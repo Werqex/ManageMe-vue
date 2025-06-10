@@ -2,6 +2,11 @@
 	<div>
 		<h1>ManageMe</h1>
 
+		<!-- Zalogowany użytkownik -->
+		<div class="user-info">
+			Zalogowany: {{ currentUser.firstName }} {{ currentUser.lastName }}
+		</div>
+
 		<!-- Formularz -->
 		<form @submit.prevent="handleSubmit">
 			<input v-model="name" placeholder="Nazwa" required />
@@ -27,6 +32,26 @@ interface Project {
 	id: number;
 	name: string;
 	description: string;
+}
+
+// Model użytkownika
+interface User {
+	id: number;
+	firstName: string;
+	lastName: string;
+}
+
+// Klasa zarządzająca użytkownikiem
+class UserManager {
+	private currentUser: User = {
+		id: 1,
+		firstName: 'Jan',
+		lastName: 'Kowalski',
+	};
+
+	getCurrentUser(): User {
+		return this.currentUser;
+	}
 }
 
 // Dedykowana klasa API
@@ -72,6 +97,7 @@ class ProjectApi {
 }
 
 // Instancja API
+const userManager = new UserManager();
 const api = new ProjectApi();
 
 // Stan aplikacji
@@ -80,6 +106,9 @@ const name = ref('');
 const description = ref('');
 const editMode = ref(false);
 const editId = ref<number | null>(null);
+
+// Stan użytkownika
+const currentUser = ref<User>(userManager.getCurrentUser());
 
 // Funkcje używające API
 const getProjects = () => {
