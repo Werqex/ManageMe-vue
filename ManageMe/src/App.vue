@@ -1,153 +1,70 @@
 <template>
-	<div>
-		<h1>ManageMe</h1>
+  <div>
+    <h1>ManageMe</h1>
 
-		<!-- Zalogowany użytkownik -->
-		<div class="user-info">
-			Zalogowany: {{ currentUser.firstName }} {{ currentUser.lastName }}
-		</div>
+    <!-- Zalogowany użytkownik -->
+    <div class="user-info">
+      Zalogowany: {{ userStore.currentUser.firstName }} {{ userStore.currentUser.lastName }}
+    </div>
 
-		<!-- Formularz -->
-		<form @submit.prevent="handleSubmit">
-			<input v-model="name" placeholder="Nazwa" required />
-			<input v-model="description" placeholder="Opis" />
-			<button type="submit">{{ editMode ? 'Zapisz' : 'Dodaj' }}</button>
-			<button v-if="editMode" type="button" @click="cancelEdit">Anuluj</button>
-		</form>
+    <!-- Formularz -->
+    <form @submit.prevent="handleSubmit">
+      <input v-model="name" placeholder="Nazwa" required />
+      <input v-model="description" placeholder="Opis" />
+      <button type="submit">{{ projectStore.editMode ? 'Zapisz' : 'Dodaj' }}</button>
+      <button v-if="projectStore.editMode" type="button" @click="cancelEdit">Anuluj</button>
+    </form>
 
-		<!-- Lista -->
-		<div v-for="project in projects" :key="project.id">
-			<h3>{{ project.name }}</h3>
-			<p>{{ project.description }}</p>
-			<button @click="editProject(project)">Edytuj</button>
-			<button @click="deleteProject(project.id)">Usuń</button>
-		</div>
-	</div>
+    <!-- Lista -->
+    <div v-for="project in projectStore.projects" :key="project.id">
+      <h3>{{ project.name }}</h3>
+      <p>{{ project.description }}</p>
+      <button @click="editProject(project)">Edytuj</button>
+      <button @click="projectStore.deleteProject(project.id)">Usuń</button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useProjectStore } from './stores/projectStore';
+import { useUserStore } from './stores/userStore';
 
-interface Project {
-	id: number;
-	name: string;
-	description: string;
-}
+// Stores
+const projectStore = useProjectStore();
+const userStore = useUserStore();
 
-// Model użytkownika
-interface User {
-	id: number;
-	firstName: string;
-	lastName: string;
-}
-
-// Klasa zarządzająca użytkownikiem
-class UserManager {
-	private currentUser: User = {
-		id: 1,
-		firstName: 'Jan',
-		lastName: 'Kowalski',
-	};
-
-	getCurrentUser(): User {
-		return this.currentUser;
-	}
-}
-
-// Dedykowana klasa API
-class ProjectApi {
-	private storageKey = 'projects';
-
-	getAll(): Project[] {
-		const data = localStorage.getItem(this.storageKey);
-		return data ? JSON.parse(data) : [];
-	}
-
-	save(projects: Project[]): void {
-		localStorage.setItem(this.storageKey, JSON.stringify(projects));
-	}
-
-	create(name: string, description: string): Project {
-		const projects = this.getAll();
-		const newProject = {
-			id: Date.now(),
-			name,
-			description,
-		};
-		projects.push(newProject);
-		this.save(projects);
-		return newProject;
-	}
-
-	update(id: number, name: string, description: string): void {
-		const projects = this.getAll();
-		const project = projects.find((p) => p.id === id);
-		if (project) {
-			project.name = name;
-			project.description = description;
-			this.save(projects);
-		}
-	}
-
-	delete(id: number): void {
-		const projects = this.getAll();
-		const filtered = projects.filter((p) => p.id !== id);
-		this.save(filtered);
-	}
-}
-
-// Instancja API
-const userManager = new UserManager();
-const api = new ProjectApi();
-
-// Stan aplikacji
-const projects = ref<Project[]>([]);
+// Lokalne zmienne formularza
 const name = ref('');
 const description = ref('');
-const editMode = ref(false);
-const editId = ref<number | null>(null);
 
-// Stan użytkownika
-const currentUser = ref<User>(userManager.getCurrentUser());
-
-// Funkcje używające API
-const getProjects = () => {
-	projects.value = api.getAll();
-};
-
+// Funkcje
 const handleSubmit = () => {
-	if (editMode.value && editId.value) {
-		api.update(editId.value, name.value, description.value);
-	} else {
-		api.create(name.value, description.value);
-	}
-
-	clearForm();
-	getProjects();
+  if (projectStore.editMode && projectStore.editId) {
+    projectStore.updateProject(projectStore.editId, name.value, description.value);
+  } else {
+    projectStore.createProject(name.value, description.value);
+  }
+  clearForm();
 };
 
-const editProject = (project: Project) => {
-	name.value = project.name;
-	description.value = project.description;
-	editMode.value = true;
-	editId.value = project.id;
-};
-
-const deleteProject = (id: number) => {
-	api.delete(id);
-	getProjects();
+const editProject = (project: any) => {
+  name.value = project.name;
+  description.value = project.description;
+  projectStore.startEdit(project);
 };
 
 const cancelEdit = () => {
-	clearForm();
+  projectStore.cancelEdit();
+  clearForm();
 };
 
 const clearForm = () => {
-	name.value = '';
-	description.value = '';
-	editMode.value = false;
-	editId.value = null;
+  name.value = '';
+  description.value = '';
 };
 
-onMounted(getProjects);
+onMounted(() => {
+  projectStore.fetchProjects();
+});
 </script>
