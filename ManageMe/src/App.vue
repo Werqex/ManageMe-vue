@@ -1,70 +1,78 @@
 <template>
-  <div>
-    <h1>ManageMe</h1>
+	<div>
+		<h1>ManageMe</h1>
 
-    <!-- Zalogowany użytkownik -->
-    <div class="user-info">
-      Zalogowany: {{ userStore.currentUser.firstName }} {{ userStore.currentUser.lastName }}
-    </div>
+		<!-- Zalogowany użytkownik -->
+		<div>
+			Zalogowany: {{ userStore.currentUser.firstName }}
+			{{ userStore.currentUser.lastName }}
+		</div>
 
-    <!-- Formularz -->
-    <form @submit.prevent="handleSubmit">
-      <input v-model="name" placeholder="Nazwa" required />
-      <input v-model="description" placeholder="Opis" />
-      <button type="submit">{{ projectStore.editMode ? 'Zapisz' : 'Dodaj' }}</button>
-      <button v-if="projectStore.editMode" type="button" @click="cancelEdit">Anuluj</button>
-    </form>
+		<!-- Widok gdy wybrany jest aktywny projekt -->
+		<ActiveProject
+			v-if="projectStore.activeProject"
+			:project="projectStore.activeProject"
+			:show-edit-form="projectStore.editMode"
+			@go-back="projectStore.goBackToAllProjects()"
+			@edit="startEdit"
+			@delete="deleteActiveProject"
+			@update="updateProject"
+			@cancel-edit="cancelEdit" />
 
-    <!-- Lista -->
-    <div v-for="project in projectStore.projects" :key="project.id">
-      <h3>{{ project.name }}</h3>
-      <p>{{ project.description }}</p>
-      <button @click="editProject(project)">Edytuj</button>
-      <button @click="projectStore.deleteProject(project.id)">Usuń</button>
-    </div>
-  </div>
+		<!-- Widok wszystkich projektów -->
+		<div v-else>
+			<!-- Formularz dodawania nowego projektu -->
+			<ProjectForm @submit="createProject" />
+
+			<!-- Lista wszystkich projektów -->
+			<ProjectList
+				:projects="projectStore.projects"
+				@select="projectStore.selectProject"
+				@delete="projectStore.deleteProject" />
+		</div>
+	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useProjectStore } from './stores/projectStore';
 import { useUserStore } from './stores/userStore';
+import type { Project } from './types/Project';
+
+import ActiveProject from './components/ActiveProject.vue';
+import ProjectForm from './components/ProjectForm.vue';
+import ProjectList from './components/ProjectList.vue';
 
 // Stores
 const projectStore = useProjectStore();
 const userStore = useUserStore();
 
-// Lokalne zmienne formularza
-const name = ref('');
-const description = ref('');
-
 // Funkcje
-const handleSubmit = () => {
-  if (projectStore.editMode && projectStore.editId) {
-    projectStore.updateProject(projectStore.editId, name.value, description.value);
-  } else {
-    projectStore.createProject(name.value, description.value);
-  }
-  clearForm();
+const createProject = (name: string, description: string) => {
+	projectStore.createProject(name, description);
 };
 
-const editProject = (project: any) => {
-  name.value = project.name;
-  description.value = project.description;
-  projectStore.startEdit(project);
+const updateProject = (name: string, description: string) => {
+	if (projectStore.editId) {
+		projectStore.updateProject(projectStore.editId, name, description);
+		projectStore.cancelEdit();
+	}
+};
+
+const startEdit = (project: Project) => {
+	projectStore.startEdit(project);
 };
 
 const cancelEdit = () => {
-  projectStore.cancelEdit();
-  clearForm();
+	projectStore.cancelEdit();
 };
 
-const clearForm = () => {
-  name.value = '';
-  description.value = '';
+const deleteActiveProject = (id: number) => {
+	projectStore.deleteProject(id);
+	projectStore.goBackToAllProjects();
 };
 
 onMounted(() => {
-  projectStore.fetchProjects();
+	projectStore.fetchProjects();
 });
 </script>

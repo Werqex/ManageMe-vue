@@ -8,6 +8,7 @@ export const useProjectStore = defineStore('projects', () => {
   const projects = ref<Project[]>([]);
   const editMode = ref(false);
   const editId = ref<number | null>(null);
+  const activeProject = ref<Project | null>(null);
 
   // Akcje
   const fetchProjects = () => {
@@ -40,15 +41,26 @@ export const useProjectStore = defineStore('projects', () => {
     editId.value = null;
   };
 
+  const selectProject = (project: Project) => {
+    activeProject.value = project;
+  };
+
+  const goBackToAllProjects = () => {
+    activeProject.value = null;
+  };
+
   return {
     projects,
     editMode,
     editId,
+    activeProject,
     fetchProjects,
     createProject,
     updateProject,
     deleteProject,
     startEdit,
-    cancelEdit
+    cancelEdit,
+    selectProject,
+    goBackToAllProjects
   };
 });
