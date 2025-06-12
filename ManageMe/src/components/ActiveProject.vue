@@ -15,14 +15,19 @@
 			:is-editing="true"
 			@submit="handleUpdate"
 			@cancel="handleCancel" />
+
+		<StoryList :project-id="project.id" />
 	</div>
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import type { Project } from '../types/Project';
 import ProjectForm from './ProjectForm.vue';
+import StoryList from './StoryList.vue';
+import { useStoryStore } from '../stores/storyStore';
 
-defineProps<{
+const props = defineProps<{
 	project: Project;
 	showEditForm: boolean;
 }>();
@@ -35,13 +40,19 @@ const emit = defineEmits<{
 	cancelEdit: [];
 }>();
 
-// Funckja emitująca dla rodzica aktualizację projektu
+const storyStore = useStoryStore();
+
+// Funkcje
 const handleUpdate = (name: string, description: string) => {
 	emit('update', name, description);
 };
 
-// Funckja emitująca dla rodzica anulowanie edycji projektu
 const handleCancel = () => {
 	emit('cancelEdit');
 };
+
+// Załaduj historyjki gdy komponent się montuje
+onMounted(() => {
+	storyStore.fetchStoriesByProject(props.project.id);
+});
 </script>
