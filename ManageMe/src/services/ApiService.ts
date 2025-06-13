@@ -1,5 +1,6 @@
 import type { Project } from '../types/Project';
 import type { Story } from '../types/Story';
+import type { User } from '../types/User';
 
 /**
  * Klasa odpowiedzialna za komunikację z "API" (localStorage)
@@ -8,9 +9,9 @@ export class ApiService {
 	// Klucze dla localStorage
 	private projectsKey = 'projects';
 	private storiesKey = 'stories';
+	private usersKey = 'users';
 
 	// Projekty
-
 	// Pobiera wszystkie projekty z localStorage
 	getAllProjects(): Project[] {
 		const data = localStorage.getItem(this.projectsKey);
@@ -110,6 +111,31 @@ export class ApiService {
 		const stories = this.getAllStories();
 		const filtered = stories.filter((s) => s.id !== id);
 		this.saveStories(filtered);
+	}
+
+	// Użytkownicy
+
+	// Pobiera wszystkich użytkowników z localStorage
+	getAllUsers(): User[] {
+		const data = localStorage.getItem(this.usersKey);
+		return data ? JSON.parse(data) : [];
+	}
+
+	// Filtruje użytkowników po roli
+	getUsersByRole(role: 'admin' | 'devops' | 'developer'): User[] {
+		const allUsers = this.getAllUsers();
+		return allUsers.filter((user) => user.role === role);
+	}
+
+	// Znajduje użytkownika po ID
+	getUserById(id: number): User | undefined {
+		const allUsers = this.getAllUsers();
+		return allUsers.find((user) => user.id === id);
+	}
+
+	// Zapisuje listę użytkowników do localStorage
+	saveUsers(users: User[]): void {
+		localStorage.setItem(this.usersKey, JSON.stringify(users));
 	}
 
 	// Zapisuje projekty do localStorage

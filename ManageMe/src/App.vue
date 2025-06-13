@@ -6,7 +6,10 @@
 		<div>
 			Zalogowany: {{ userStore.currentUser.firstName }}
 			{{ userStore.currentUser.lastName }}
+			({{ userStore.getRoleText(userStore.currentUser.role) }})
 		</div>
+
+		<UserList />
 
 		<!-- Widok gdy wybrany jest aktywny projekt -->
 		<ActiveProject
@@ -42,6 +45,7 @@ import type { Project } from './types/Project';
 import ActiveProject from './components/ActiveProject.vue';
 import ProjectForm from './components/ProjectForm.vue';
 import ProjectList from './components/ProjectList.vue';
+import UserList from './components/UserList.vue';
 
 // Stores
 const projectStore = useProjectStore();
