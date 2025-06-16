@@ -1,29 +1,61 @@
 <template>
-	<form @submit.prevent="handleSubmit">
-		<h4>{{ isEditing ? 'Edytuj historyjkę' : 'Dodaj nową historyjkę' }}</h4>
+	<div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+		<h4 class="text-lg font-semibold text-gray-800 mb-4">
+			{{ isEditing ? 'Edytuj historyjkę' : 'Dodaj nową historyjkę' }}
+		</h4>
 
-		<input v-model="localName" placeholder="Nazwa" required />
-		<textarea v-model="localDescription" placeholder="Opis"></textarea>
+		<form @submit.prevent="handleSubmit" class="space-y-4">
+			<div>
+				<input
+					v-model="localName"
+					placeholder="Nazwa"
+					required
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
+			</div>
+			<div>
+				<textarea
+					v-model="localDescription"
+					placeholder="Opis"
+					rows="3"
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-vertical"></textarea>
+			</div>
 
-		<!-- Select do wyboru priorytetu -->
-		<select v-model="localPriority">
-			<option value="low">Niski priorytet</option>
-			<option value="medium">Średni priorytet</option>
-			<option value="high">Wysoki priorytet</option>
-		</select>
-
-		<!-- Select statusu - pokazujemy tylko podczas edycji -->
-		<select v-if="isEditing" v-model="localStatus">
-			<option value="todo">Do zrobienia</option>
-			<option value="doing">W trakcie</option>
-			<option value="done">Zakończone</option>
-		</select>
-
-		<button type="submit">{{ isEditing ? 'Zapisz' : 'Dodaj' }}</button>
-		<button v-if="isEditing" type="button" @click="$emit('cancel')">
-			Anuluj
-		</button>
-	</form>
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div>
+					<select
+						v-model="localPriority"
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+						<option value="low">Niski priorytet</option>
+						<option value="medium">Średni priorytet</option>
+						<option value="high">Wysoki priorytet</option>
+					</select>
+				</div>
+				<div v-if="isEditing">
+					<select
+						v-model="localStatus"
+						class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none">
+						<option value="todo">Do zrobienia</option>
+						<option value="doing">W trakcie</option>
+						<option value="done">Zakończone</option>
+					</select>
+				</div>
+			</div>
+			<div class="flex space-x-3">
+				<button
+					type="submit"
+					class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors font-medium">
+					{{ isEditing ? 'Zapisz' : 'Dodaj' }}
+				</button>
+				<button
+					v-if="isEditing"
+					type="button"
+					@click="$emit('cancel')"
+					class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors font-medium">
+					Anuluj
+				</button>
+			</div>
+		</form>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -55,7 +87,6 @@ const emit = defineEmits<{
 }>();
 
 // Reactive refs - lokalne kopie danych z props
-// Potrzebne żeby móc edytować dane bez zmieniania props
 const localName = ref(props.name || '');
 const localDescription = ref(props.description || '');
 const localPriority = ref<'low' | 'medium' | 'high'>(
@@ -64,7 +95,6 @@ const localPriority = ref<'low' | 'medium' | 'high'>(
 const localStatus = ref<'todo' | 'doing' | 'done'>(props.status || 'todo');
 
 // Watchers - reagują na zmiany props i aktualizują lokalne dane
-// Potrzebne gdy parent component zmienia props
 watch(
 	() => props.name,
 	(newName) => {
@@ -96,7 +126,6 @@ watch(
 // Funkcja obsługująca submit formularza
 const handleSubmit = () => {
 	if (props.isEditing) {
-		// Dla edycji wysyłamy wszystkie dane włącznie ze statusem
 		emit(
 			'update',
 			localName.value,
@@ -105,7 +134,6 @@ const handleSubmit = () => {
 			localStatus.value
 		);
 	} else {
-		// Dla dodawania nowej historyjki nie wysyłamy statusu (domyślnie 'todo')
 		emit(
 			'create',
 			localName.value,
@@ -114,7 +142,6 @@ const handleSubmit = () => {
 		);
 	}
 
-	// Resetuj formularz tylko dla dodawania nowych elementów
 	if (!props.isEditing) {
 		localName.value = '';
 		localDescription.value = '';

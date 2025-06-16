@@ -1,15 +1,16 @@
 import type { Project } from '../types/Project';
 import type { Story } from '../types/Story';
 import type { User } from '../types/User';
+import type { Task } from '../types/Task';
 
-/**
- * Klasa odpowiedzialna za komunikację z "API" (localStorage)
- */
+// Klasa odpowiedzialna za komunikację z "API" (localStorage)
+
 export class ApiService {
 	// Klucze dla localStorage
 	private projectsKey = 'projects';
 	private storiesKey = 'stories';
 	private usersKey = 'users';
+	private tasksKey = 'tasks';
 
 	// Projekty
 	// Pobiera wszystkie projekty z localStorage
@@ -78,8 +79,8 @@ export class ApiService {
 			description,
 			priority,
 			projectId,
-			createdDate: new Date().toISOString(), // ISO format daty
-			status: 'todo', // Nowe historyjki zawsze mają status 'todo'
+			createdDate: new Date().toISOString(),
+			status: 'todo',
 			ownerId,
 		};
 		stories.push(newStory);
@@ -113,6 +114,125 @@ export class ApiService {
 		this.saveStories(filtered);
 	}
 
+	// Zadania (Tasks)
+
+	// Pobiera wszystkie zadania z localStorage
+	getAllTasks(): Task[] {
+		const data = localStorage.getItem(this.tasksKey);
+		return data ? JSON.parse(data) : [];
+	}
+
+	// Filtruje zadania dla konkretnej historyjki
+	getTasksByStory(storyId: number): Task[] {
+		const allTasks = this.getAllTasks();
+		return allTasks.filter((task) => task.storyId === storyId);
+	}
+
+	// Filtruje zadania dla konkretnego projektu (przez historyjki)
+	getTasksByProject(projectId: number): Task[] {
+		const projectStories = this.getStoriesByProject(projectId);
+		const storyIds = projectStories.map((story) => story.id);
+		const allTasks = this.getAllTasks();
+		return allTasks.filter((task) => storyIds.includes(task.storyId));
+	}
+
+	// Tworzy nowe zadanie przypisane do historyjki
+	createTask(
+		name: string,
+		description: string,
+		priority: 'low' | 'medium' | 'high',
+		storyId: number,
+		estimatedHours: number
+	): Task {
+		const tasks = this.getAllTasks();
+		const newTask: Task = {
+			id: Date.now(),
+			name,
+			description,
+			priority,
+			storyId,
+			estimatedHours,
+			status: 'todo',
+			createdDate: new Date().toISOString(),
+		};
+		tasks.push(newTask);
+		this.saveTasks(tasks);
+		return newTask;
+	}
+
+	// Aktualizuje podstawowe dane zadania
+	updateTask(
+		id: number,
+		name: string,
+		description: string,
+		priority: 'low' | 'medium' | 'high',
+		estimatedHours: number
+	): void {
+		const tasks = this.getAllTasks();
+		const task = tasks.find((t) => t.id === id);
+		if (task) {
+			task.name = name;
+			task.description = description;
+			task.priority = priority;
+			task.estimatedHours = estimatedHours;
+			this.saveTasks(tasks);
+		}
+	}
+
+	// Przypisuje użytkownika do zadania i zmienia status na 'doing'
+	assignUserToTask(taskId: number, userId: number): void {
+		const tasks = this.getAllTasks();
+		const task = tasks.find((t) => t.id === taskId);
+		if (task && task.status === 'todo') {
+			task.assignedUserId = userId;
+			task.status = 'doing';
+			task.startDate = new Date().toISOString();
+			this.saveTasks(tasks);
+		}
+	}
+
+	// Zmienia status zadania na 'done' i ustawia datę zakończenia
+	completeTask(taskId: number): void {
+		const tasks = this.getAllTasks();
+		const task = tasks.find((t) => t.id === taskId);
+		if (task && task.status === 'doing') {
+			task.status = 'done';
+			task.endDate = new Date().toISOString();
+			this.saveTasks(tasks);
+		}
+	}
+
+	// Zmienia status zadania z powrotem na 'todo' (resetuje przypisanie)
+	resetTaskToTodo(taskId: number): void {
+		const tasks = this.getAllTasks();
+		const task = tasks.find((t) => t.id === taskId);
+		if (task) {
+			task.status = 'todo';
+			task.assignedUserId = undefined;
+			task.startDate = undefined;
+			task.endDate = undefined;
+			this.saveTasks(tasks);
+		}
+	}
+
+	// Usuwa zadanie o podanym ID
+	deleteTask(id: number): void {
+		const tasks = this.getAllTasks();
+		const filtered = tasks.filter((t) => t.id !== id);
+		this.saveTasks(filtered);
+	}
+
+	// Pobiera szczegóły zadania wraz z powiązaną historyjką
+	getTaskDetails(taskId: number): { task: Task; story: Story } | null {
+		const task = this.getAllTasks().find((t) => t.id === taskId);
+		if (!task) return null;
+
+		const story = this.getAllStories().find((s) => s.id === task.storyId);
+		if (!story) return null;
+
+		return { task, story };
+	}
+
 	// Użytkownicy
 
 	// Pobiera wszystkich użytkowników z localStorage
@@ -125,6 +245,14 @@ export class ApiService {
 	getUsersByRole(role: 'admin' | 'devops' | 'developer'): User[] {
 		const allUsers = this.getAllUsers();
 		return allUsers.filter((user) => user.role === role);
+	}
+
+	// Pobiera użytkowników którzy mogą wykonywać zadania (devops i developer)
+	getAssignableUsers(): User[] {
+		const allUsers = this.getAllUsers();
+		return allUsers.filter(
+			(user) => user.role === 'devops' || user.role === 'developer'
+		);
 	}
 
 	// Znajduje użytkownika po ID
@@ -146,6 +274,11 @@ export class ApiService {
 	// Zapisuje historyjki do localStorage
 	private saveStories(stories: Story[]): void {
 		localStorage.setItem(this.storiesKey, JSON.stringify(stories));
+	}
+
+	// Zapisuje zadania do localStorage
+	private saveTasks(tasks: Task[]): void {
+		localStorage.setItem(this.tasksKey, JSON.stringify(tasks));
 	}
 }
 

@@ -1,20 +1,30 @@
 <template>
-	<div>
-		<button @click="$emit('goBack')">Powrót do wszystkich projektów</button>
+	<div class="space-y-6">
+		<button
+			@click="handleGoBack"
+			class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors font-medium cursor-pointer">
+			Powrót do wszystkich projektów
+		</button>
 
-		<h2>Aktywny projekt: {{ project.name }}</h2>
-		<p>{{ project.description }}</p>
+		<div class="bg-white rounded-lg shadow-md p-6">
+			<h2 class="text-3xl font-bold text-gray-800 mb-2">
+				Aktywny projekt: {{ project.name }}
+			</h2>
+			<p class="text-gray-600 mb-4">{{ project.description }}</p>
 
-		<button @click="$emit('edit', project)">Edytuj projekt</button>
-		<button @click="$emit('delete', project.id)">Usuń projekt</button>
-
-		<ProjectForm
-			v-if="showEditForm"
-			:name="project.name"
-			:description="project.description"
-			:is-editing="true"
-			@submit="handleUpdate"
-			@cancel="handleCancel" />
+			<div class="flex space-x-3 mb-6">
+				<button
+					@click="handleEdit"
+					class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors font-medium cursor-pointer">
+					Edytuj projekt
+				</button>
+				<button
+					@click="handleDelete"
+					class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors font-medium cursor-pointer">
+					Usuń projekt
+				</button>
+			</div>
+		</div>
 
 		<StoryList :project-id="project.id" />
 	</div>
@@ -23,35 +33,34 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import type { Project } from '../types/Project';
-import ProjectForm from './ProjectForm.vue';
 import StoryList from './StoryList.vue';
 import { useStoryStore } from '../stores/storyStore';
 
 const props = defineProps<{
 	project: Project;
-	showEditForm: boolean;
 }>();
 
 const emit = defineEmits<{
 	goBack: [];
 	edit: [project: Project];
 	delete: [id: number];
-	update: [name: string, description: string];
-	cancelEdit: [];
 }>();
 
 const storyStore = useStoryStore();
 
-// Funkcje
-const handleUpdate = (name: string, description: string) => {
-	emit('update', name, description);
+// Funkcje które obsługują eventy
+const handleGoBack = () => {
+	emit('goBack');
 };
 
-const handleCancel = () => {
-	emit('cancelEdit');
+const handleEdit = () => {
+	emit('edit', props.project);
 };
 
-// Załaduj historyjki gdy komponent się montuje
+const handleDelete = () => {
+	emit('delete', props.project.id);
+};
+
 onMounted(() => {
 	storyStore.fetchStoriesByProject(props.project.id);
 });
