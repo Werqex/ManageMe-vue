@@ -1,18 +1,31 @@
 <template>
-	<div class="min-h-screen bg-gray-50">
+	<LoginForm
+		v-if="!userStore.isAuthenticated"
+		@login-success="handleLoginSuccess" />
+
+	<div v-else class="min-h-screen bg-gray-50">
 		<div class="container mx-auto px-4 py-8">
-			<h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
-				ManageMe
-			</h1>
-			<div class="bg-blue-100 border border-blue-300 rounded-lg p-4 mb-6">
+			<div class="flex justify-between items-center mb-8">
+				<h1 class="text-4xl font-bold text-gray-800">ManageMe</h1>
+
+				<button
+					@click="handleLogout"
+					class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors cursor-pointer">
+					Wyloguj się
+				</button>
+			</div>
+
+			<div
+				class="bg-blue-100 border border-blue-300 rounded-lg p-4 mb-6"
+				v-if="userStore.currentUser">
 				<p class="text-blue-800 font-medium">
 					Zalogowany: {{ userStore.currentUser.firstName }}
-					{{ userStore.currentUser.lastName }}
-					({{ userStore.getRoleText(userStore.currentUser.role) }})
+					{{ userStore.currentUser.lastName }} ({{
+						userStore.getRoleText(userStore.currentUser.role)
+					}})
 				</p>
 			</div>
 
-			<UserList />
 			<ActiveProject
 				v-if="projectStore.activeProject"
 				:project="projectStore.activeProject"
@@ -33,6 +46,7 @@
 					@delete="projectStore.deleteProject" />
 			</div>
 		</div>
+
 		<EditModal
 			:show="modalState.show"
 			:type="modalState.type"
@@ -52,13 +66,13 @@ import type { Project } from './types/Project';
 import ActiveProject from './components/ActiveProject.vue';
 import ProjectList from './components/ProjectList.vue';
 import EditModal from './components/EditModal.vue';
-import UserList from './components/UserList.vue';
+import LoginForm from './components/LoginForm.vue';
 
 // Stores
 const projectStore = useProjectStore();
 const userStore = useUserStore();
 
-// Stan modala - jeden stan dla wszystkich typów edycji
+// Stan modala
 const modalState = ref({
 	show: false,
 	type: 'project' as 'project' | 'story',
@@ -66,7 +80,17 @@ const modalState = ref({
 	isEditing: false,
 });
 
-// Funkcje dla projektu
+// Funkcje logowania
+const handleLoginSuccess = (user: any) => {
+	userStore.login(user);
+	projectStore.fetchProjects();
+};
+
+const handleLogout = () => {
+	userStore.logout();
+	projectStore.goBackToAllProjects();
+};
+
 const openProjectCreateModal = () => {
 	modalState.value = {
 		show: true,
@@ -85,7 +109,6 @@ const openProjectEditModal = (project: Project) => {
 	};
 };
 
-// Funkcja zamykająca modal
 const closeModal = () => {
 	modalState.value = {
 		show: false,
@@ -95,12 +118,9 @@ const closeModal = () => {
 	};
 };
 
-// Funkcja obsługująca wysłanie danych z modala
 const handleModalSubmit = (formData: any) => {
 	if (modalState.value.type === 'project') {
-		// Obsługa projektu
 		if (modalState.value.isEditing) {
-			// Edycja istniejącego projektu
 			const projectId = modalState.value.data.id;
 			projectStore.updateProject(
 				projectId,
@@ -108,12 +128,9 @@ const handleModalSubmit = (formData: any) => {
 				formData.description
 			);
 		} else {
-			// Dodawanie nowego projektu
 			projectStore.createProject(formData.name, formData.description);
 		}
 	}
-	// W przyszłości tutaj będziemy obsługiwać historyjki
-
 	closeModal();
 };
 
@@ -122,7 +139,10 @@ const deleteActiveProject = (id: number) => {
 	projectStore.goBackToAllProjects();
 };
 
-onMounted(() => {
-	projectStore.fetchProjects();
+onMounted(async () => {
+	await userStore.checkAuth();
+	if (userStore.isAuthenticated) {
+		projectStore.fetchProjects();
+	}
 });
 </script>
