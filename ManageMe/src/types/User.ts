@@ -1,27 +1,27 @@
-export interface User {
+export type User = {
 	id: number;
 	firstName: string;
 	lastName: string;
 	role: 'admin' | 'devops' | 'developer';
 	login: string;
 	password: string;
-}
+};
 
-export interface LoginRequest {
+export type LoginRequest = {
 	login: string;
 	password: string;
-}
+};
 
-export interface LoginResponse {
+export type LoginResponse = {
 	token: string;
 	refreshToken: string;
 	user: UserProfile;
-}
+};
 
-export interface UserProfile {
+export type UserProfile = {
 	id: number;
 	firstName: string;
 	lastName: string;
 	role: 'admin' | 'devops' | 'developer';
 	login: string;
-}
+};

@@ -1,1 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* Włączenie dark mode przez klasę */
+@variant dark (.dark &);

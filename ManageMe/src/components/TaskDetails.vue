@@ -4,33 +4,43 @@
 		class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
 		@click="handleBackdropClick">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+			class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transition-colors"
 			@click.stop>
 			<div
-				class="flex justify-between items-center p-6 border-b border-gray-200">
-				<h3 class="text-xl font-semibold text-gray-900">Szczegóły zadania</h3>
+				class="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-600">
+				<h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
+					Szczegóły zadania
+				</h3>
 				<button
 					@click="$emit('close')"
-					class="text-gray-400 hover:text-gray-600 text-2xl font-bold cursor-pointer">
+					class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 text-2xl font-bold cursor-pointer">
 					x
 				</button>
 			</div>
 			<div class="p-6 space-y-6" v-if="taskDetails">
-				<div class="bg-gray-50 rounded-lg p-4">
-					<h4 class="text-lg font-semibold text-gray-800 mb-3">
+				<div
+					class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors">
+					<h4
+						class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">
 						Informacje o zadaniu
 					</h4>
 
 					<div class="grid gap-4 md:grid-cols-2">
 						<div>
-							<label class="text-sm font-medium text-gray-600">Nazwa</label>
-							<p class="text-gray-900 font-semibold">
+							<label
+								class="text-sm font-medium text-gray-600 dark:text-gray-300"
+								>Nazwa</label
+							>
+							<p class="text-gray-900 dark:text-gray-100 font-semibold">
 								{{ taskDetails.task.name }}
 							</p>
 						</div>
 
 						<div>
-							<label class="text-sm font-medium text-gray-600">Priorytet</label>
+							<label
+								class="text-sm font-medium text-gray-600 dark:text-gray-300"
+								>Priorytet</label
+							>
 							<span
 								:class="getPriorityClass(taskDetails.task.priority)"
 								class="inline-block px-2 py-1 rounded-full text-xs font-medium">
@@ -38,22 +48,29 @@
 							</span>
 						</div>
 						<div class="md:col-span-2">
-							<label class="text-sm font-medium text-gray-600">Opis</label>
-							<p class="text-gray-900">
+							<label
+								class="text-sm font-medium text-gray-600 dark:text-gray-300"
+								>Opis</label
+							>
+							<p class="text-gray-900 dark:text-gray-100">
 								{{ taskDetails.task.description || 'Brak opisu' }}
 							</p>
 						</div>
 						<div>
-							<label class="text-sm font-medium text-gray-600"
+							<label
+								class="text-sm font-medium text-gray-600 dark:text-gray-300"
 								>Przewidywany czas</label
 							>
-							<p class="text-gray-900">
+							<p class="text-gray-900 dark:text-gray-100">
 								{{ taskDetails.task.estimatedHours }} godzin
 							</p>
 						</div>
 
 						<div>
-							<label class="text-sm font-medium text-gray-600">Status</label>
+							<label
+								class="text-sm font-medium text-gray-600 dark:text-gray-300"
+								>Status</label
+							>
 							<span
 								:class="getStatusClass(taskDetails.task.status)"
 								class="inline-block px-2 py-1 rounded-full text-xs font-medium">
@@ -62,69 +79,79 @@
 						</div>
 					</div>
 				</div>
-				<div class="bg-blue-50 rounded-lg p-4">
-					<h4 class="text-lg font-semibold text-blue-800 mb-3">
+				<div
+					class="bg-blue-50 dark:bg-blue-900 rounded-lg p-4 transition-colors">
+					<h4
+						class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">
 						Powiązana historyjka
 					</h4>
 
 					<div class="space-y-2">
 						<div>
-							<label class="text-sm font-medium text-blue-600"
+							<label
+								class="text-sm font-medium text-blue-600 dark:text-blue-300"
 								>Nazwa historyjki</label
 							>
-							<p class="text-blue-900 font-semibold">
+							<p class="text-blue-900 dark:text-blue-100 font-semibold">
 								{{ taskDetails.story.name }}
 							</p>
 						</div>
 
 						<div>
-							<label class="text-sm font-medium text-blue-600"
+							<label
+								class="text-sm font-medium text-blue-600 dark:text-blue-300"
 								>Opis historyjki</label
 							>
-							<p class="text-blue-900">
+							<p class="text-blue-900 dark:text-blue-100">
 								{{ taskDetails.story.description || 'Brak opisu' }}
 							</p>
 						</div>
 					</div>
 				</div>
-				<div class="bg-green-50 rounded-lg p-4">
-					<h4 class="text-lg font-semibold text-green-800 mb-3">
+				<div
+					class="bg-green-50 dark:bg-green-900 rounded-lg p-4 transition-colors">
+					<h4
+						class="text-lg font-semibold text-green-800 dark:text-green-200 mb-3">
 						Daty i przypisanie
 					</h4>
 
 					<div class="grid gap-4 md:grid-cols-2">
 						<div>
-							<label class="text-sm font-medium text-green-600"
+							<label
+								class="text-sm font-medium text-green-600 dark:text-green-300"
 								>Data utworzenia</label
 							>
-							<p class="text-green-900">
+							<p class="text-green-900 dark:text-green-100">
 								{{ formatDateTime(taskDetails.task.createdDate) }}
 							</p>
 						</div>
 
 						<div v-if="taskDetails.task.assignedUserId">
-							<label class="text-sm font-medium text-green-600"
+							<label
+								class="text-sm font-medium text-green-600 dark:text-green-300"
 								>Przypisane do</label
 							>
-							<p class="text-green-900 font-semibold">
+							<p class="text-green-900 dark:text-green-100 font-semibold">
 								{{ getAssignedUserName(taskDetails.task.assignedUserId) }}
 							</p>
 						</div>
 
 						<div v-if="taskDetails.task.startDate">
-							<label class="text-sm font-medium text-green-600"
+							<label
+								class="text-sm font-medium text-green-600 dark:text-green-300"
 								>Data rozpoczęcia</label
 							>
-							<p class="text-green-900">
+							<p class="text-green-900 dark:text-green-100">
 								{{ formatDateTime(taskDetails.task.startDate) }}
 							</p>
 						</div>
 
 						<div v-if="taskDetails.task.endDate">
-							<label class="text-sm font-medium text-green-600"
+							<label
+								class="text-sm font-medium text-green-600 dark:text-green-300"
 								>Data zakończenia</label
 							>
-							<p class="text-green-900">
+							<p class="text-green-900 dark:text-green-100">
 								{{ formatDateTime(taskDetails.task.endDate) }}
 							</p>
 						</div>
@@ -134,43 +161,47 @@
 					<button
 						v-if="taskDetails.task.status === 'todo'"
 						@click="$emit('assign', taskDetails.task.id)"
-						class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors cursor-pointer">
+						class="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-md transition-colors cursor-pointer">
 						Przypisz użytkownika
 					</button>
 
 					<button
 						v-if="taskDetails.task.status === 'doing'"
 						@click="$emit('complete', taskDetails.task.id)"
-						class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors cursor-pointer">
+						class="px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-md transition-colors cursor-pointer">
 						Oznacz jako zakończone
 					</button>
 
 					<button
 						v-if="taskDetails.task.status !== 'todo'"
 						@click="$emit('reset', taskDetails.task.id)"
-						class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors cursor-pointer">
+						class="px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white rounded-md transition-colors cursor-pointer">
 						Resetuj do TODO
 					</button>
 
 					<button
 						@click="$emit('edit', taskDetails.task)"
-						class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors cursor-pointer">
+						class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white rounded-md transition-colors cursor-pointer">
 						Edytuj zadanie
 					</button>
 				</div>
 			</div>
 
 			<div v-else class="p-6">
-				<p class="text-gray-500">Nie można załadować szczegółów zadania.</p>
+				<p class="text-gray-500 dark:text-gray-400">
+					Nie można załadować szczegółów zadania.
+				</p>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { watch, onBeforeUnmount } from 'vue';
 import type { Task } from '../types/Task';
 import type { Story } from '../types/Story';
 import { useUserStore } from '../stores/userStore';
+import { disableScroll, enableScroll } from '../utils/scrollLock';
 
 const props = defineProps<{
 	show: boolean;
@@ -186,6 +217,18 @@ const emit = defineEmits<{
 }>();
 
 const userStore = useUserStore();
+
+// Obserwuj zmiany w show prop i zarządzaj scroll'em
+watch(
+	() => props.show,
+	(newShow) => {
+		if (newShow) {
+			disableScroll();
+		} else {
+			enableScroll();
+		}
+	}
+);
 
 const handleBackdropClick = (event: Event) => {
 	if (event.target === event.currentTarget) {
@@ -204,9 +247,10 @@ const getPriorityText = (priority: 'low' | 'medium' | 'high') => {
 
 const getPriorityClass = (priority: 'low' | 'medium' | 'high') => {
 	const classes = {
-		low: 'bg-green-100 text-green-800',
-		medium: 'bg-yellow-100 text-yellow-800',
-		high: 'bg-red-100 text-red-800',
+		low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+		medium:
+			'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+		high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 	};
 	return classes[priority];
 };
@@ -222,9 +266,9 @@ const getStatusText = (status: 'todo' | 'doing' | 'done') => {
 
 const getStatusClass = (status: 'todo' | 'doing' | 'done') => {
 	const classes = {
-		todo: 'bg-gray-100 text-gray-800',
-		doing: 'bg-blue-100 text-blue-800',
-		done: 'bg-green-100 text-green-800',
+		todo: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+		doing: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+		done: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
 	};
 	return classes[status];
 };
@@ -244,4 +288,11 @@ const formatDateTime = (dateString: string) => {
 		minute: '2-digit',
 	});
 };
+
+// Cleanup przy unmount
+onBeforeUnmount(() => {
+	if (props.show) {
+		enableScroll();
+	}
+});
 </script>

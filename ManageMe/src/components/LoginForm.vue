@@ -1,8 +1,10 @@
 <template>
-	<div class="min-h-screen bg-gray-50 flex items-center justify-center">
+	<div
+		class="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center transition-colors">
 		<div class="max-w-md w-full space-y-8">
 			<div>
-				<h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+				<h2
+					class="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
 					Zaloguj się do ManageMe
 				</h2>
 			</div>
@@ -12,7 +14,7 @@
 					<div>
 						<label
 							for="login"
-							class="block text-sm font-medium text-gray-700 mb-1">
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 							Login
 						</label>
 						<input
@@ -20,14 +22,14 @@
 							v-model="loginData.login"
 							type="text"
 							required
-							class="relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+							class="relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
 							placeholder="Wprowadź login" />
 					</div>
 
 					<div>
 						<label
 							for="password"
-							class="block text-sm font-medium text-gray-700 mb-1">
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 							Hasło
 						</label>
 						<input
@@ -35,23 +37,23 @@
 							v-model="loginData.password"
 							type="password"
 							required
-							class="relative block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+							class="relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400"
 							placeholder="Wprowadź hasło" />
 					</div>
 				</div>
 
 				<div
 					v-if="error"
-					class="bg-red-50 border border-red-200 rounded-md p-4">
-					<div class="text-sm text-red-700">{{ error }}</div>
+					class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md p-4">
+					<div class="text-sm text-red-700 dark:text-red-300">{{ error }}</div>
 				</div>
 
-				<!-- Przykładowe dane -->
-				<div class="bg-blue-50 border border-blue-200 rounded-md p-4">
-					<h4 class="text-sm font-medium text-blue-800 mb-2">
+				<div
+					class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md p-4">
+					<h4 class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
 						Przykładowe loginy:
 					</h4>
-					<div class="text-xs text-blue-700 space-y-1">
+					<div class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
 						<p><strong>Admin:</strong> admin / admin123</p>
 						<p><strong>Developer:</strong> developer / dev123</p>
 						<p><strong>DevOps:</strong> devops / devops123</p>
@@ -62,7 +64,7 @@
 					<button
 						type="submit"
 						:disabled="isLoading"
-						class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 cursor-pointer">
+						class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 disabled:bg-gray-400 dark:disabled:bg-gray-600 cursor-pointer transition-colors">
 						{{ isLoading ? 'Logowanie...' : 'Zaloguj się' }}
 					</button>
 				</div>
@@ -107,7 +109,6 @@ const handleSubmit = async () => {
 
 		const data = await response.json();
 
-		// Zapisz tokeny
 		localStorage.setItem('auth_token', data.token);
 		localStorage.setItem('refresh_token', data.refreshToken);
 

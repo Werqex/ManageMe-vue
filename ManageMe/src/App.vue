@@ -3,22 +3,30 @@
 		v-if="!userStore.isAuthenticated"
 		@login-success="handleLoginSuccess" />
 
-	<div v-else class="min-h-screen bg-gray-50">
+	<div
+		v-else
+		class="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
 		<div class="container mx-auto px-4 py-8">
 			<div class="flex justify-between items-center mb-8">
-				<h1 class="text-4xl font-bold text-gray-800">ManageMe</h1>
+				<h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">
+					ManageMe
+				</h1>
 
-				<button
-					@click="handleLogout"
-					class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors cursor-pointer">
-					Wyloguj się
-				</button>
+				<div class="flex items-center space-x-4">
+					<ThemeToggle />
+
+					<button
+						@click="handleLogout"
+						class="px-4 py-2 bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer">
+						Wyloguj się
+					</button>
+				</div>
 			</div>
 
 			<div
-				class="bg-blue-100 border border-blue-300 rounded-lg p-4 mb-6"
+				class="bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-700 rounded-lg p-4 mb-6"
 				v-if="userStore.currentUser">
-				<p class="text-blue-800 font-medium">
+				<p class="text-blue-800 dark:text-blue-200 font-medium">
 					Zalogowany: {{ userStore.currentUser.firstName }}
 					{{ userStore.currentUser.lastName }} ({{
 						userStore.getRoleText(userStore.currentUser.role)
@@ -33,10 +41,10 @@
 				@edit="openProjectEditModal"
 				@delete="deleteActiveProject" />
 			<div v-else class="space-y-6">
-				<div class="bg-white rounded-lg shadow-md p-6">
+				<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
 					<button
 						@click="openProjectCreateModal"
-						class="w-full px-4 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors font-medium text-lg cursor-pointer">
+						class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-md transition-colors font-medium text-lg cursor-pointer">
 						Dodaj nowy projekt
 					</button>
 				</div>
@@ -58,19 +66,22 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useProjectStore } from './stores/projectStore';
 import { useUserStore } from './stores/userStore';
+import { useThemeStore } from './stores/themeStore';
 import type { Project } from './types/Project';
 
 import ActiveProject from './components/ActiveProject.vue';
 import ProjectList from './components/ProjectList.vue';
 import EditModal from './components/EditModal.vue';
 import LoginForm from './components/LoginForm.vue';
+import ThemeToggle from './components/ThemeToggle.vue';
 
 // Stores
 const projectStore = useProjectStore();
 const userStore = useUserStore();
+const themeStore = useThemeStore();
 
 // Stan modala
 const modalState = ref({
@@ -79,6 +90,9 @@ const modalState = ref({
 	data: null as any,
 	isEditing: false,
 });
+
+// Referencja do funkcji usuwającej listener
+let removeSystemThemeListener: (() => void) | null = null;
 
 // Funkcje logowania
 const handleLoginSuccess = (user: any) => {
@@ -140,9 +154,21 @@ const deleteActiveProject = (id: number) => {
 };
 
 onMounted(async () => {
+	// Inicjalizuj motyw
+	themeStore.initializeTheme();
+	removeSystemThemeListener = themeStore.setupSystemThemeListener();
+
+	// Sprawdź autoryzację
 	await userStore.checkAuth();
 	if (userStore.isAuthenticated) {
 		projectStore.fetchProjects();
+	}
+});
+
+onBeforeUnmount(() => {
+	// Usuń listener motywu systemu
+	if (removeSystemThemeListener) {
+		removeSystemThemeListener();
 	}
 });
 </script>

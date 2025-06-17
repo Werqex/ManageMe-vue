@@ -1,14 +1,15 @@
 <template>
-	<div class="bg-white rounded-lg shadow-md p-6">
+	<div
+		class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
 		<!-- Widok zadań dla wybranej historyjki -->
 		<div v-if="selectedStoryId">
 			<div class="flex items-center mb-6">
 				<button
 					@click="goBackToStories"
-					class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors cursor-pointer mr-4">
+					class="px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white rounded-md transition-colors cursor-pointer mr-4">
 					← Powrót do historyjek
 				</button>
-				<h3 class="text-2xl font-semibold text-gray-800">
+				<h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">
 					Zadania: {{ selectedStoryName }}
 				</h3>
 			</div>
@@ -22,23 +23,24 @@
 				@task-details="openTaskDetailsModal" />
 		</div>
 		<div v-else>
-			<h3 class="text-2xl font-semibold text-gray-800 mb-6">
+			<h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
 				Historyjki projektu
 			</h3>
 			<div class="mb-8">
 				<button
 					@click="openStoryCreateModal"
-					class="w-full px-4 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors font-medium cursor-pointer">
+					class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-md transition-colors font-medium cursor-pointer">
 					Dodaj nową historyjkę
 				</button>
 			</div>
 			<div class="grid gap-6 lg:grid-cols-3">
-				<div class="bg-gray-50 rounded-lg p-4">
+				<div
+					class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors">
 					<h4
-						class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+						class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
 						Do zrobienia
 						<span
-							class="ml-2 bg-gray-200 text-gray-700 text-sm px-2 py-1 rounded-full">
+							class="ml-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm px-2 py-1 rounded-full">
 							{{ storyStore.todoStories.length }}
 						</span>
 					</h4>
@@ -54,12 +56,13 @@
 					</div>
 				</div>
 
-				<div class="bg-blue-50 rounded-lg p-4">
+				<div
+					class="bg-blue-50 dark:bg-blue-900 rounded-lg p-4 transition-colors">
 					<h4
-						class="text-lg font-semibold text-blue-700 mb-4 flex items-center">
+						class="text-lg font-semibold text-blue-700 dark:text-blue-200 mb-4 flex items-center">
 						W trakcie
 						<span
-							class="ml-2 bg-blue-200 text-blue-700 text-sm px-2 py-1 rounded-full">
+							class="ml-2 bg-blue-200 dark:bg-blue-700 text-blue-700 dark:text-blue-200 text-sm px-2 py-1 rounded-full">
 							{{ storyStore.doingStories.length }}
 						</span>
 					</h4>
@@ -75,12 +78,13 @@
 					</div>
 				</div>
 
-				<div class="bg-green-50 rounded-lg p-4">
+				<div
+					class="bg-green-50 dark:bg-green-900 rounded-lg p-4 transition-colors">
 					<h4
-						class="text-lg font-semibold text-green-700 mb-4 flex items-center">
+						class="text-lg font-semibold text-green-700 dark:text-green-200 mb-4 flex items-center">
 						Zakończone
 						<span
-							class="ml-2 bg-green-200 text-green-700 text-sm px-2 py-1 rounded-full">
+							class="ml-2 bg-green-200 dark:bg-green-700 text-green-700 dark:text-green-200 text-sm px-2 py-1 rounded-full">
 							{{ storyStore.doneStories.length }}
 						</span>
 					</h4>
@@ -250,7 +254,7 @@ const handleStoryModalSubmit = (formData: any) => {
 			formData.description,
 			formData.priority,
 			props.projectId,
-			userStore.currentUser.id
+			userStore.currentUser!.id
 		);
 	}
 	closeStoryModal();
@@ -267,6 +271,8 @@ const openTaskCreateModal = () => {
 };
 
 const openTaskEditModal = (task: Task) => {
+	closeTaskDetailsModal();
+
 	taskModalState.value = {
 		show: true,
 		type: 'task',

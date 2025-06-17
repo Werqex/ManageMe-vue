@@ -1,4 +1,4 @@
-export interface Story {
+export type Story = {
 	id: number;
 	name: string;
 	description: string;
@@ -7,4 +7,4 @@ export interface Story {
 	createdDate: string;
 	status: 'todo' | 'doing' | 'done';
 	ownerId: number;
-}
+};
