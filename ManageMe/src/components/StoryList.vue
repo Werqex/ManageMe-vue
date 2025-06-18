@@ -7,7 +7,7 @@
 				<button
 					@click="goBackToStories"
 					class="px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white rounded-md transition-colors cursor-pointer mr-4">
-					← Powrót do historyjek
+					Powrót do historyjek
 				</button>
 				<h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">
 					Zadania: {{ selectedStoryName }}
@@ -315,12 +315,21 @@ const handleTaskModalSubmit = (formData: any) => {
 };
 
 // Funkcje dla szczegółów zadania
-const openTaskDetailsModal = (taskId: number) => {
-	const details = taskStore.getTaskDetails(taskId);
-	taskDetailsState.value = {
-		show: true,
-		details,
-	};
+const openTaskDetailsModal = async (taskId: number) => {
+	try {
+		const details = await taskStore.getTaskDetails(taskId);
+		taskDetailsState.value = {
+			show: true,
+			details,
+		};
+	} catch (error) {
+		console.error('Failed to load task details:', error);
+		// Pokaż błąd użytkownikowi
+		taskDetailsState.value = {
+			show: true,
+			details: null,
+		};
+	}
 };
 
 const closeTaskDetailsModal = () => {

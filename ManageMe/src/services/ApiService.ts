@@ -3,283 +3,368 @@ import type { Story } from '../types/Story';
 import type { User } from '../types/User';
 import type { Task } from '../types/Task';
 
-// Klasa odpowiedzialna za komunikację z "API" (localStorage)
-
 export class ApiService {
-	// Klucze dla localStorage
-	private projectsKey = 'projects';
-	private storiesKey = 'stories';
-	private usersKey = 'users';
-	private tasksKey = 'tasks';
+	// Bazowy adres API
+	private baseUrl = 'http://localhost:3000/api';
 
-	// Projekty
-	// Pobiera wszystkie projekty z localStorage
-	getAllProjects(): Project[] {
-		const data = localStorage.getItem(this.projectsKey);
-		return data ? JSON.parse(data) : [];
+	// Pobiera nagłówki autoryzacyjne z tokenem JWT
+	private async getAuthHeaders() {
+		const token = localStorage.getItem('auth_token');
+		return {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		};
 	}
 
-	// Tworzy nowy projekt i zapisuje w localStorage
-	createProject(name: string, description: string): Project {
-		const projects = this.getAllProjects();
-		const newProject: Project = {
-			id: Date.now(), // Proste generowanie ID na podstawie timestamp
-			name,
-			description,
+	// PROJEKTY - Z API
+	// Pobiera listę wszystkich projektów
+	// Konwertuje format MongoDB na frontend
+	async getAllProjects(): Promise<Project[]> {
+		const response = await fetch(`${this.baseUrl}/projects`, {
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to fetch projects');
+		const mongoProjects = await response.json();
+
+		return mongoProjects.map((p: any) => ({
+			id: p._id,
+			name: p.name,
+			description: p.description,
+		}));
+	}
+
+	// Tworzy nowy projekt w systemie
+	async createProject(name: string, description: string): Promise<Project> {
+		const response = await fetch(`${this.baseUrl}/projects`, {
+			method: 'POST',
+			headers: await this.getAuthHeaders(),
+			body: JSON.stringify({ name, description }),
+		});
+		if (!response.ok) throw new Error('Failed to create project');
+		const mongoProject = await response.json();
+
+		return {
+			id: mongoProject._id,
+			name: mongoProject.name,
+			description: mongoProject.description,
 		};
-		projects.push(newProject);
-		this.saveProjects(projects);
-		return newProject;
 	}
 
 	// Aktualizuje istniejący projekt
-	updateProject(id: number, name: string, description: string): void {
-		const projects = this.getAllProjects();
-		const project = projects.find((p) => p.id === id);
-		if (project) {
-			project.name = name;
-			project.description = description;
-			this.saveProjects(projects);
-		}
+	async updateProject(
+		id: number,
+		name: string,
+		description: string
+	): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/projects/${id}`, {
+			method: 'PUT',
+			headers: await this.getAuthHeaders(),
+			body: JSON.stringify({ name, description }),
+		});
+		if (!response.ok) throw new Error('Failed to update project');
 	}
 
-	// Usuwa projekt o podanym ID
-	deleteProject(id: number): void {
-		const projects = this.getAllProjects();
-		const filtered = projects.filter((p) => p.id !== id);
-		this.saveProjects(filtered);
+	// Usuwa projekt o podanym identyfikatorze
+	async deleteProject(id: number): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/projects/${id}`, {
+			method: 'DELETE',
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to delete project');
 	}
 
-	// Historyjki
+	// STORIES - Z API
+	// Pobiera historie przypisane do projektu
+	// Konwertuje format MongoDB na frontend
+	async getStoriesByProject(projectId: number): Promise<Story[]> {
+		const response = await fetch(
+			`${this.baseUrl}/stories/project/${projectId}`,
+			{
+				headers: await this.getAuthHeaders(),
+			}
+		);
+		if (!response.ok) throw new Error('Failed to fetch stories');
+		const mongoStories = await response.json();
 
-	// Pobiera wszystkie historyjki z localStorage
-	getAllStories(): Story[] {
-		const data = localStorage.getItem(this.storiesKey);
-		return data ? JSON.parse(data) : [];
+		return mongoStories.map((s: any) => ({
+			id: s._id,
+			name: s.name,
+			description: s.description,
+			priority: s.priority,
+			projectId: s.projectId,
+			createdDate: s.createdDate,
+			status: s.status,
+			ownerId: s.ownerId,
+		}));
 	}
 
-	// Filtruje historyjki dla konkretnego projektu
-	getStoriesByProject(projectId: number): Story[] {
-		const allStories = this.getAllStories();
-		return allStories.filter((story) => story.projectId === projectId);
-	}
-
-	// Tworzy nową historyjkę przypisaną do projektu
-	createStory(
+	// Tworzy nową historię w systemie
+	async createStory(
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
 		projectId: number,
 		ownerId: number
-	): Story {
-		const stories = this.getAllStories();
-		const newStory: Story = {
-			id: Date.now(),
-			name,
-			description,
-			priority,
-			projectId,
-			createdDate: new Date().toISOString(),
-			status: 'todo',
-			ownerId,
+	): Promise<Story> {
+		const response = await fetch(`${this.baseUrl}/stories`, {
+			method: 'POST',
+			headers: await this.getAuthHeaders(),
+			body: JSON.stringify({
+				name,
+				description,
+				priority,
+				projectId: projectId.toString(),
+				ownerId: ownerId.toString(),
+			}),
+		});
+		if (!response.ok) throw new Error('Failed to create story');
+		const mongoStory = await response.json();
+
+		return {
+			id: mongoStory._id,
+			name: mongoStory.name,
+			description: mongoStory.description,
+			priority: mongoStory.priority,
+			projectId: mongoStory.projectId,
+			createdDate: mongoStory.createdDate,
+			status: mongoStory.status,
+			ownerId: mongoStory.ownerId,
 		};
-		stories.push(newStory);
-		this.saveStories(stories);
-		return newStory;
 	}
 
-	// Aktualizuje istniejącą historyjkę
-	updateStory(
+	// Aktualizuje istniejącą historię
+	// Obejmuje aktualizację statusu
+	async updateStory(
 		id: number,
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
 		status: 'todo' | 'doing' | 'done'
-	): void {
-		const stories = this.getAllStories();
-		const story = stories.find((s) => s.id === id);
-		if (story) {
-			story.name = name;
-			story.description = description;
-			story.priority = priority;
-			story.status = status;
-			this.saveStories(stories);
-		}
+	): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/stories/${id}`, {
+			method: 'PUT',
+			headers: await this.getAuthHeaders(),
+			body: JSON.stringify({ name, description, priority, status }),
+		});
+		if (!response.ok) throw new Error('Failed to update story');
 	}
 
-	// Usuwa historyjkę o podanym ID
-	deleteStory(id: number): void {
-		const stories = this.getAllStories();
-		const filtered = stories.filter((s) => s.id !== id);
-		this.saveStories(filtered);
+	// Usuwa historię o podanym identyfikatorze
+	async deleteStory(id: number): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/stories/${id}`, {
+			method: 'DELETE',
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to delete story');
 	}
 
-	// Zadania (Tasks)
+	// UŻYTKOWNICY - Z API
+	// Pobiera listę wszystkich użytkowników
+	// Konwertuje format API na frontend
+	async getAllUsers(): Promise<User[]> {
+		const response = await fetch(`${this.baseUrl}/users`, {
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to fetch users');
+		const mongoUsers = await response.json();
 
-	// Pobiera wszystkie zadania z localStorage
-	getAllTasks(): Task[] {
-		const data = localStorage.getItem(this.tasksKey);
-		return data ? JSON.parse(data) : [];
+		return mongoUsers.map((u: any) => ({
+			id: u.id,
+			firstName: u.firstName,
+			lastName: u.lastName,
+			role: u.role,
+			login: u.login,
+			password: '',
+		}));
 	}
 
-	// Filtruje zadania dla konkretnej historyjki
-	getTasksByStory(storyId: number): Task[] {
-		const allTasks = this.getAllTasks();
-		return allTasks.filter((task) => task.storyId === storyId);
+	// TASKS - Z API
+	// Pobiera wszystkie zadania w systemie
+	// Konwertuje format MongoDB na frontend
+	async getAllTasks(): Promise<Task[]> {
+		const response = await fetch(`${this.baseUrl}/tasks`, {
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to fetch tasks');
+		const mongoTasks = await response.json();
+
+		return mongoTasks.map((t: any) => ({
+			id: t._id,
+			name: t.name,
+			description: t.description,
+			priority: t.priority,
+			storyId: t.storyId,
+			estimatedHours: t.estimatedHours,
+			status: t.status,
+			createdDate: t.createdDate.toString(),
+			startDate: t.startDate?.toString(),
+			endDate: t.endDate?.toString(),
+			assignedUserId: t.assignedUserId,
+		}));
 	}
 
-	// Filtruje zadania dla konkretnego projektu (przez historyjki)
-	getTasksByProject(projectId: number): Task[] {
-		const projectStories = this.getStoriesByProject(projectId);
-		const storyIds = projectStories.map((story) => story.id);
-		const allTasks = this.getAllTasks();
-		return allTasks.filter((task) => storyIds.includes(task.storyId));
+	// Pobiera zadania przypisane do historii
+	// Konwertuje format MongoDB na frontend
+	async getTasksByStory(storyId: number): Promise<Task[]> {
+		const response = await fetch(`${this.baseUrl}/tasks/story/${storyId}`, {
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to fetch tasks');
+		const mongoTasks = await response.json();
+
+		return mongoTasks.map((t: any) => ({
+			id: t._id,
+			name: t.name,
+			description: t.description,
+			priority: t.priority,
+			storyId: t.storyId,
+			estimatedHours: t.estimatedHours,
+			status: t.status,
+			createdDate: t.createdDate.toString(),
+			startDate: t.startDate?.toString(),
+			endDate: t.endDate?.toString(),
+			assignedUserId: t.assignedUserId,
+		}));
 	}
 
-	// Tworzy nowe zadanie przypisane do historyjki
-	createTask(
+	// Tworzy nowe zadanie w systemie
+	// Automatycznie ustawia status jako "todo"
+	async createTask(
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
 		storyId: number,
 		estimatedHours: number
-	): Task {
-		const tasks = this.getAllTasks();
-		const newTask: Task = {
-			id: Date.now(),
-			name,
-			description,
-			priority,
-			storyId,
-			estimatedHours,
-			status: 'todo',
-			createdDate: new Date().toISOString(),
+	): Promise<Task> {
+		const response = await fetch(`${this.baseUrl}/tasks`, {
+			method: 'POST',
+			headers: await this.getAuthHeaders(),
+			body: JSON.stringify({
+				name,
+				description,
+				priority,
+				storyId: storyId.toString(),
+				estimatedHours,
+			}),
+		});
+		if (!response.ok) throw new Error('Failed to create task');
+		const mongoTask = await response.json();
+
+		return {
+			id: mongoTask._id,
+			name: mongoTask.name,
+			description: mongoTask.description,
+			priority: mongoTask.priority,
+			storyId: mongoTask.storyId,
+			estimatedHours: mongoTask.estimatedHours,
+			status: mongoTask.status,
+			createdDate: mongoTask.createdDate.toString(),
 		};
-		tasks.push(newTask);
-		this.saveTasks(tasks);
-		return newTask;
 	}
 
-	// Aktualizuje podstawowe dane zadania
-	updateTask(
+	// Aktualizuje istniejące zadanie
+	// Nie zmienia statusu ani przypisania
+	async updateTask(
 		id: number,
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
 		estimatedHours: number
-	): void {
-		const tasks = this.getAllTasks();
-		const task = tasks.find((t) => t.id === id);
-		if (task) {
-			task.name = name;
-			task.description = description;
-			task.priority = priority;
-			task.estimatedHours = estimatedHours;
-			this.saveTasks(tasks);
+	): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/tasks/${id}`, {
+			method: 'PUT',
+			headers: await this.getAuthHeaders(),
+			body: JSON.stringify({ name, description, priority, estimatedHours }),
+		});
+		if (!response.ok) throw new Error('Failed to update task');
+	}
+
+	// Przypisuje użytkownika do zadania
+	// Rozpoczyna pracę - ustawia status "doing"
+	async assignUserToTask(taskId: number, userId: number): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/tasks/${taskId}/assign`, {
+			method: 'POST',
+			headers: await this.getAuthHeaders(),
+			body: JSON.stringify({ userId: userId.toString() }),
+		});
+		if (!response.ok) throw new Error('Failed to assign user to task');
+	}
+
+	// Oznacza zadanie jako ukończone
+	// Ustawia status na "done" i zapisuje datę ukończenia
+	async completeTask(taskId: number): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/tasks/${taskId}/complete`, {
+			method: 'POST',
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to complete task');
+	}
+
+	// Resetuje zadanie do początkowego stanu
+	// Ustawia status "todo" i usuwa daty rozpoczęcia/zakończenia
+	async resetTaskToTodo(taskId: number): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/tasks/${taskId}/reset`, {
+			method: 'POST',
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to reset task');
+	}
+
+	// Usuwa zadanie o podanym identyfikatorze
+	async deleteTask(id: number): Promise<void> {
+		const response = await fetch(`${this.baseUrl}/tasks/${id}`, {
+			method: 'DELETE',
+			headers: await this.getAuthHeaders(),
+		});
+		if (!response.ok) throw new Error('Failed to delete task');
+	}
+
+	// Pobiera szczegółowe informacje o zadaniu wraz z powiązaną historią
+	// Łączy dane zadania i historii w jeden obiekt
+	async getTaskDetails(
+		taskId: number
+	): Promise<{ task: Task; story: Story } | null> {
+		try {
+			const response = await fetch(`${this.baseUrl}/tasks/${taskId}/details`, {
+				headers: await this.getAuthHeaders(),
+			});
+
+			if (!response.ok) return null;
+
+			const data = await response.json();
+
+			// Konwertuj MongoDB format na frontend format
+			return {
+				task: {
+					id: data.task._id,
+					name: data.task.name,
+					description: data.task.description,
+					priority: data.task.priority,
+					storyId: data.task.storyId,
+					estimatedHours: data.task.estimatedHours,
+					status: data.task.status,
+					createdDate: data.task.createdDate,
+					startDate: data.task.startDate,
+					endDate: data.task.endDate,
+					assignedUserId: data.task.assignedUserId,
+				},
+				story: {
+					id: data.story._id,
+					name: data.story.name,
+					description: data.story.description,
+					priority: data.story.priority,
+					projectId: data.story.projectId,
+					createdDate: data.story.createdDate,
+					status: data.story.status,
+					ownerId: data.story.ownerId,
+				},
+			};
+		} catch (error) {
+			console.error('Error fetching task details:', error);
+			return null;
 		}
-	}
-
-	// Przypisuje użytkownika do zadania i zmienia status na 'doing'
-	assignUserToTask(taskId: number, userId: number): void {
-		const tasks = this.getAllTasks();
-		const task = tasks.find((t) => t.id === taskId);
-		if (task && task.status === 'todo') {
-			task.assignedUserId = userId;
-			task.status = 'doing';
-			task.startDate = new Date().toISOString();
-			this.saveTasks(tasks);
-		}
-	}
-
-	// Zmienia status zadania na 'done' i ustawia datę zakończenia
-	completeTask(taskId: number): void {
-		const tasks = this.getAllTasks();
-		const task = tasks.find((t) => t.id === taskId);
-		if (task && task.status === 'doing') {
-			task.status = 'done';
-			task.endDate = new Date().toISOString();
-			this.saveTasks(tasks);
-		}
-	}
-
-	// Zmienia status zadania z powrotem na 'todo' (resetuje przypisanie)
-	resetTaskToTodo(taskId: number): void {
-		const tasks = this.getAllTasks();
-		const task = tasks.find((t) => t.id === taskId);
-		if (task) {
-			task.status = 'todo';
-			task.assignedUserId = undefined;
-			task.startDate = undefined;
-			task.endDate = undefined;
-			this.saveTasks(tasks);
-		}
-	}
-
-	// Usuwa zadanie o podanym ID
-	deleteTask(id: number): void {
-		const tasks = this.getAllTasks();
-		const filtered = tasks.filter((t) => t.id !== id);
-		this.saveTasks(filtered);
-	}
-
-	// Pobiera szczegóły zadania wraz z powiązaną historyjką
-	getTaskDetails(taskId: number): { task: Task; story: Story } | null {
-		const task = this.getAllTasks().find((t) => t.id === taskId);
-		if (!task) return null;
-
-		const story = this.getAllStories().find((s) => s.id === task.storyId);
-		if (!story) return null;
-
-		return { task, story };
-	}
-
-	// Użytkownicy
-
-	// Pobiera wszystkich użytkowników z localStorage
-	getAllUsers(): User[] {
-		const data = localStorage.getItem(this.usersKey);
-		return data ? JSON.parse(data) : [];
-	}
-
-	// Filtruje użytkowników po roli
-	getUsersByRole(role: 'admin' | 'devops' | 'developer'): User[] {
-		const allUsers = this.getAllUsers();
-		return allUsers.filter((user) => user.role === role);
-	}
-
-	// Pobiera użytkowników którzy mogą wykonywać zadania (devops i developer)
-	getAssignableUsers(): User[] {
-		const allUsers = this.getAllUsers();
-		return allUsers.filter(
-			(user) => user.role === 'devops' || user.role === 'developer'
-		);
-	}
-
-	// Znajduje użytkownika po ID
-	getUserById(id: number): User | undefined {
-		const allUsers = this.getAllUsers();
-		return allUsers.find((user) => user.id === id);
-	}
-
-	// Zapisuje listę użytkowników do localStorage
-	saveUsers(users: User[]): void {
-		localStorage.setItem(this.usersKey, JSON.stringify(users));
-	}
-
-	// Zapisuje projekty do localStorage
-	private saveProjects(projects: Project[]): void {
-		localStorage.setItem(this.projectsKey, JSON.stringify(projects));
-	}
-
-	// Zapisuje historyjki do localStorage
-	private saveStories(stories: Story[]): void {
-		localStorage.setItem(this.storiesKey, JSON.stringify(stories));
-	}
-
-	// Zapisuje zadania do localStorage
-	private saveTasks(tasks: Task[]): void {
-		localStorage.setItem(this.tasksKey, JSON.stringify(tasks));
 	}
 }
 
+// Instancja serwisu dostępna dla całej aplikacji
 export const apiService = new ApiService();

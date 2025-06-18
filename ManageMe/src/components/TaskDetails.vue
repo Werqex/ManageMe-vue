@@ -17,7 +17,16 @@
 					x
 				</button>
 			</div>
-			<div class="p-6 space-y-6" v-if="taskDetails">
+			<div v-if="loading" class="p-6">
+				<div class="flex items-center justify-center py-8">
+					<div
+						class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+					<span class="ml-2 text-gray-600 dark:text-gray-400"
+						>Ładowanie...</span
+					>
+				</div>
+			</div>
+			<div v-else-if="taskDetails" class="p-6 space-y-6">
 				<div
 					class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors">
 					<h4
@@ -186,9 +195,8 @@
 					</button>
 				</div>
 			</div>
-
 			<div v-else class="p-6">
-				<p class="text-gray-500 dark:text-gray-400">
+				<p class="text-gray-500 dark:text-gray-400 text-center py-8">
 					Nie można załadować szczegółów zadania.
 				</p>
 			</div>
@@ -206,6 +214,7 @@ import { disableScroll, enableScroll } from '../utils/scrollLock';
 const props = defineProps<{
 	show: boolean;
 	taskDetails: { task: Task; story: Story } | null;
+	loading?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -218,7 +227,6 @@ const emit = defineEmits<{
 
 const userStore = useUserStore();
 
-// Obserwuj zmiany w show prop i zarządzaj scroll'em
 watch(
 	() => props.show,
 	(newShow) => {
@@ -273,9 +281,14 @@ const getStatusClass = (status: 'todo' | 'doing' | 'done') => {
 	return classes[status];
 };
 
-const getAssignedUserName = (userId: number) => {
+const getAssignedUserName = (userId: string | number | undefined) => {
+	if (!userId) return 'Nieprzypisane';
+
 	const user = userStore.getUserById(userId);
-	return user ? `${user.firstName} ${user.lastName}` : 'Nieznany użytkownik';
+
+	return user
+		? `${user.firstName} ${user.lastName}`
+		: `Nieznany użytkownik (ID: ${userId})`;
 };
 
 const formatDateTime = (dateString: string) => {
@@ -289,7 +302,6 @@ const formatDateTime = (dateString: string) => {
 	});
 };
 
-// Cleanup przy unmount
 onBeforeUnmount(() => {
 	if (props.show) {
 		enableScroll();

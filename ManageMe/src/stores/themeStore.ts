@@ -2,10 +2,12 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useThemeStore = defineStore('theme', () => {
+	// Stan motywu aplikacji
 	const isDark = ref(false);
 	const isSystemPreference = ref(true);
 
-	// Inicjalizacja motywu
+	// Inicjalizacja motywu przy starcie
+	// Zapobiega migotaniu UI
 	const initializeTheme = () => {
 		const savedTheme = localStorage.getItem('theme-preference');
 
@@ -16,16 +18,16 @@ export const useThemeStore = defineStore('theme', () => {
 			isDark.value = false;
 			isSystemPreference.value = false;
 		} else {
-			// Użyj preferencji systemu
+			// Brak preferencji = ustawienia systemowe
 			isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
 			isSystemPreference.value = true;
 		}
 
-		// Natychmiast zastosuj motyw
 		applyTheme();
 	};
 
-	// Nasłuchiwanie zmian preferencji systemu
+	// Nasluchuje zmian w ustawieniach systemu
+	// Reaguje na dzialania uzytkownika
 	const setupSystemThemeListener = () => {
 		const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -38,27 +40,20 @@ export const useThemeStore = defineStore('theme', () => {
 
 		mediaQuery.addEventListener('change', handleSystemThemeChange);
 
+		// Funkcja czyszczaca listener
 		return () =>
 			mediaQuery.removeEventListener('change', handleSystemThemeChange);
 	};
 
-	// Zastosuj motyw do dokumentu
+	// Aplikuje motyw przez modyfikacje klas DOM
 	const applyTheme = () => {
-		// Force remove and add classes to ensure they apply
 		document.documentElement.classList.remove('dark');
 		if (isDark.value) {
 			document.documentElement.classList.add('dark');
 		}
-
-		// Debug log
-		console.log(
-			'Theme applied:',
-			isDark.value ? 'dark' : 'light',
-			document.documentElement.classList.contains('dark')
-		);
 	};
 
-	// Ustaw jasny motyw
+	// Ustawia jasny motyw
 	const setLightTheme = () => {
 		isDark.value = false;
 		isSystemPreference.value = false;
@@ -66,7 +61,7 @@ export const useThemeStore = defineStore('theme', () => {
 		applyTheme();
 	};
 
-	// Ustaw ciemny motyw
+	// Ustawia ciemny motyw
 	const setDarkTheme = () => {
 		isDark.value = true;
 		isSystemPreference.value = false;
@@ -74,7 +69,7 @@ export const useThemeStore = defineStore('theme', () => {
 		applyTheme();
 	};
 
-	// Użyj preferencji systemu
+	// Przywraca uzywanie ustawien systemowych
 	const useSystemTheme = () => {
 		isSystemPreference.value = true;
 		isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -82,9 +77,10 @@ export const useThemeStore = defineStore('theme', () => {
 		applyTheme();
 	};
 
-	// Przełącz między jasnym a ciemnym
+	// Inteligentnie przelacza miedzy motywami
 	const toggleTheme = () => {
 		if (isSystemPreference.value) {
+			// Wybor manualny zamiast auto
 			if (isDark.value) {
 				setLightTheme();
 			} else {

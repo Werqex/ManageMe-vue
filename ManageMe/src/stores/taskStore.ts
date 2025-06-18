@@ -5,11 +5,11 @@ import type { Story } from '../types/Story';
 import { apiService } from '../services/ApiService';
 
 export const useTaskStore = defineStore('tasks', () => {
-	// Stan
+	// Stan aplikacji - przechowuje zadania i identyfikator bieżącej historii
 	const tasks = ref<Task[]>([]);
 	const currentStoryId = ref<number | null>(null);
 
-	// Computed - filtrowanie zadań według statusu
+	// Obliczane właściwości - filtrowanie zadań według statusu
 	const todoTasks = computed(() =>
 		tasks.value.filter((task) => task.status === 'todo')
 	);
@@ -22,7 +22,7 @@ export const useTaskStore = defineStore('tasks', () => {
 		tasks.value.filter((task) => task.status === 'done')
 	);
 
-	// Computed
+	// Podsumowanie liczby zadań w różnych statusach
 	const tasksCount = computed(() => ({
 		total: tasks.value.length,
 		todo: todoTasks.value.length,
@@ -30,91 +30,122 @@ export const useTaskStore = defineStore('tasks', () => {
 		done: doneTasks.value.length,
 	}));
 
-	// Akcje - pobieranie i tworzenie zadań
-
-	// Pobiera zadania dla konkretnej historyjki
-	const fetchTasksByStory = (storyId: number) => {
-		currentStoryId.value = storyId;
-		tasks.value = apiService.getTasksByStory(storyId);
-	};
-
-	// Pobiera zadania dla konkretnego projektu
-	const fetchTasksByProject = (projectId: number) => {
-		tasks.value = apiService.getTasksByProject(projectId);
-	};
-
-	// Tworzy nowe zadanie
-	const createTask = (
-		name: string,
-		description: string,
-		priority: 'low' | 'medium' | 'high',
-		storyId: number,
-		estimatedHours: number
-	) => {
-		apiService.createTask(name, description, priority, storyId, estimatedHours);
-		if (currentStoryId.value) {
-			fetchTasksByStory(currentStoryId.value);
+	// Pobiera zadania dla określonej historii
+	const fetchTasksByStory = async (storyId: number) => {
+		try {
+			currentStoryId.value = storyId;
+			tasks.value = await apiService.getTasksByStory(storyId);
+		} catch (error) {
+			console.error('Failed to fetch tasks:', error);
 		}
 	};
 
-	// Aktualizuje podstawowe dane zadania
-	const updateTask = (
+	// Tworzy nowe zadanie
+	const createTask = async (
+		name: string,
+		description: string,
+		priority: 'low' | 'medium' | 'high',
+		storyId: number, // Zmiana z string na number
+		estimatedHours: number
+	) => {
+		try {
+			await apiService.createTask(
+				name,
+				description,
+				priority,
+				storyId,
+				estimatedHours
+			);
+			if (currentStoryId.value) {
+				await fetchTasksByStory(currentStoryId.value);
+			}
+		} catch (error) {
+			console.error('Failed to create task:', error);
+		}
+	};
+
+	// Aktualizuje istniejące zadanie
+	const updateTask = async (
 		id: number,
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
 		estimatedHours: number
 	) => {
-		apiService.updateTask(id, name, description, priority, estimatedHours);
-		if (currentStoryId.value) {
-			fetchTasksByStory(currentStoryId.value);
+		try {
+			await apiService.updateTask(
+				id,
+				name,
+				description,
+				priority,
+				estimatedHours
+			);
+			if (currentStoryId.value) {
+				await fetchTasksByStory(currentStoryId.value);
+			}
+		} catch (error) {
+			console.error('Failed to update task:', error);
 		}
 	};
 
-	// Usuwa zadanie
-	const deleteTask = (id: number) => {
-		apiService.deleteTask(id);
-		if (currentStoryId.value) {
-			fetchTasksByStory(currentStoryId.value);
+	// Usuwa zadanie o podanym identyfikatorze
+	const deleteTask = async (id: number) => {
+		try {
+			await apiService.deleteTask(id);
+			if (currentStoryId.value) {
+				await fetchTasksByStory(currentStoryId.value);
+			}
+		} catch (error) {
+			console.error('Failed to delete task:', error);
 		}
 	};
 
-	// Akcje - zarządzanie statusem i przypisaniem
-
-	// Przypisuje użytkownika do zadania (automatycznie zmienia status na 'doing')
-	const assignUserToTask = (taskId: number, userId: number) => {
-		apiService.assignUserToTask(taskId, userId);
-		if (currentStoryId.value) {
-			fetchTasksByStory(currentStoryId.value);
+	// Przypisuje użytkownika do zadania
+	const assignUserToTask = async (taskId: number, userId: number) => {
+		try {
+			await apiService.assignUserToTask(taskId, userId);
+			if (currentStoryId.value) {
+				await fetchTasksByStory(currentStoryId.value);
+			}
+		} catch (error) {
+			console.error('Failed to assign user to task:', error);
 		}
 	};
 
-	// Oznacza zadanie jako zakończone
-	const completeTask = (taskId: number) => {
-		apiService.completeTask(taskId);
-		if (currentStoryId.value) {
-			fetchTasksByStory(currentStoryId.value);
+	// Oznacza zadanie jako ukończone
+	const completeTask = async (taskId: number) => {
+		try {
+			await apiService.completeTask(taskId);
+			if (currentStoryId.value) {
+				await fetchTasksByStory(currentStoryId.value);
+			}
+		} catch (error) {
+			console.error('Failed to complete task:', error);
 		}
 	};
 
-	// Resetuje zadanie do statusu 'todo'
-	const resetTaskToTodo = (taskId: number) => {
-		apiService.resetTaskToTodo(taskId);
-		if (currentStoryId.value) {
-			fetchTasksByStory(currentStoryId.value);
+	// Resetuje zadanie do statusu "do zrobienia"
+	const resetTaskToTodo = async (taskId: number) => {
+		try {
+			await apiService.resetTaskToTodo(taskId);
+			if (currentStoryId.value) {
+				await fetchTasksByStory(currentStoryId.value);
+			}
+		} catch (error) {
+			console.error('Failed to reset task:', error);
 		}
 	};
 
-	// Pobiera szczegóły zadania z powiązaną historyjką
-	const getTaskDetails = (
+	// Pobiera szczegółowe informacje o zadaniu wraz z powiązaną historią
+	const getTaskDetails = async (
 		taskId: number
-	): { task: Task; story: Story } | null => {
-		return apiService.getTaskDetails(taskId);
-	};
-
-	// Pobiera użytkowników którzy mogą być przypisani do zadań
-	const getAssignableUsers = () => {
-		return apiService.getAssignableUsers();
+	): Promise<{ task: Task; story: Story } | null> => {
+		try {
+			return await apiService.getTaskDetails(taskId);
+		} catch (error) {
+			console.error('Failed to get task details:', error);
+			return null;
+		}
 	};
 
 	return {
@@ -125,7 +156,6 @@ export const useTaskStore = defineStore('tasks', () => {
 		doneTasks,
 		tasksCount,
 		fetchTasksByStory,
-		fetchTasksByProject,
 		createTask,
 		updateTask,
 		deleteTask,
@@ -133,6 +163,5 @@ export const useTaskStore = defineStore('tasks', () => {
 		completeTask,
 		resetTaskToTodo,
 		getTaskDetails,
-		getAssignableUsers,
 	};
 });

@@ -4,11 +4,13 @@ import type { Story } from '../types/Story';
 import { apiService } from '../services/ApiService';
 
 export const useStoryStore = defineStore('stories', () => {
-	// Stan
+	// Stan historii i UI
 	const stories = ref<Story[]>([]);
 	const editMode = ref(false);
 	const editId = ref<number | null>(null);
 
+	// Filtrowane historie wedlug statusu
+	// Umozliwia latwe grupowanie dla widoku kanban
 	const todoStories = computed(() =>
 		stories.value.filter((story) => story.status === 'todo')
 	);
@@ -21,23 +23,42 @@ export const useStoryStore = defineStore('stories', () => {
 		stories.value.filter((story) => story.status === 'done')
 	);
 
-	// Akcje
-	const fetchStoriesByProject = (projectId: number) => {
-		stories.value = apiService.getStoriesByProject(projectId);
+	// Pobiera historie dla wybranego projektu
+	// Aktualizuje stan lokalny na podstawie danych z API
+	const fetchStoriesByProject = async (projectId: number) => {
+		try {
+			stories.value = await apiService.getStoriesByProject(projectId);
+		} catch (error) {
+			console.error('Failed to fetch stories:', error);
+		}
 	};
 
-	const createStory = (
+	// Tworzy nowa historie w projekcie
+	// Odswieza liste po zakonczeniu
+	const createStory = async (
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
 		projectId: number,
 		ownerId: number
 	) => {
-		apiService.createStory(name, description, priority, projectId, ownerId);
-		fetchStoriesByProject(projectId);
+		try {
+			await apiService.createStory(
+				name,
+				description,
+				priority,
+				projectId,
+				ownerId
+			);
+			await fetchStoriesByProject(projectId);
+		} catch (error) {
+			console.error('Failed to create story:', error);
+		}
 	};
 
-	const updateStory = (
+	// Aktualizuje istniejaca historie
+	// Odswieza liste historii po modyfikacji
+	const updateStory = async (
 		id: number,
 		name: string,
 		description: string,
@@ -45,20 +66,34 @@ export const useStoryStore = defineStore('stories', () => {
 		status: 'todo' | 'doing' | 'done',
 		projectId: number
 	) => {
-		apiService.updateStory(id, name, description, priority, status);
-		fetchStoriesByProject(projectId);
+		try {
+			await apiService.updateStory(id, name, description, priority, status);
+			await fetchStoriesByProject(projectId);
+		} catch (error) {
+			console.error('Failed to update story:', error);
+		}
 	};
 
-	const deleteStory = (id: number, projectId: number) => {
-		apiService.deleteStory(id);
-		fetchStoriesByProject(projectId);
+	// Usuwa historie z systemu
+	// Odswieza liste po usunieciu
+	const deleteStory = async (id: number, projectId: number) => {
+		try {
+			await apiService.deleteStory(id);
+			await fetchStoriesByProject(projectId);
+		} catch (error) {
+			console.error('Failed to delete story:', error);
+		}
 	};
 
+	// Aktywuje tryb edycji dla historii
+	// Zapisuje ID edytowanej historii
 	const startEdit = (story: Story) => {
 		editMode.value = true;
 		editId.value = story.id;
 	};
 
+	// Przerywa proces edycji
+	// Resetuje flagi edycji
 	const cancelEdit = () => {
 		editMode.value = false;
 		editId.value = null;
