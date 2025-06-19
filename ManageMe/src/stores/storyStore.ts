@@ -7,7 +7,7 @@ export const useStoryStore = defineStore('stories', () => {
 	// Stan historii i UI
 	const stories = ref<Story[]>([]);
 	const editMode = ref(false);
-	const editId = ref<number | null>(null);
+	const editId = ref<string | null>(null); // Zmiana z number na string
 
 	// Filtrowane historie wedlug statusu
 	// Umozliwia latwe grupowanie dla widoku kanban
@@ -25,7 +25,7 @@ export const useStoryStore = defineStore('stories', () => {
 
 	// Pobiera historie dla wybranego projektu
 	// Aktualizuje stan lokalny na podstawie danych z API
-	const fetchStoriesByProject = async (projectId: number) => {
+	const fetchStoriesByProject = async (projectId: string) => {
 		try {
 			stories.value = await apiService.getStoriesByProject(projectId);
 		} catch (error) {
@@ -39,8 +39,8 @@ export const useStoryStore = defineStore('stories', () => {
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
-		projectId: number,
-		ownerId: number
+		projectId: string,
+		ownerId: string
 	) => {
 		try {
 			await apiService.createStory(
@@ -59,12 +59,12 @@ export const useStoryStore = defineStore('stories', () => {
 	// Aktualizuje istniejaca historie
 	// Odswieza liste historii po modyfikacji
 	const updateStory = async (
-		id: number,
+		id: string,
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
 		status: 'todo' | 'doing' | 'done',
-		projectId: number
+		projectId: string
 	) => {
 		try {
 			await apiService.updateStory(id, name, description, priority, status);
@@ -76,7 +76,7 @@ export const useStoryStore = defineStore('stories', () => {
 
 	// Usuwa historie z systemu
 	// Odswieza liste po usunieciu
-	const deleteStory = async (id: number, projectId: number) => {
+	const deleteStory = async (id: string, projectId: string) => {
 		try {
 			await apiService.deleteStory(id);
 			await fetchStoriesByProject(projectId);

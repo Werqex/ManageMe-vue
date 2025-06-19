@@ -76,9 +76,9 @@ defineProps<{
 
 defineEmits<{
 	edit: [story: Story];
-	delete: [id: number];
-	changeStatus: [id: number, status: 'todo' | 'doing' | 'done'];
-	viewTasks: [storyId: number];
+	delete: [id: string];
+	changeStatus: [id: string, status: 'todo' | 'doing' | 'done'];
+	viewTasks: [storyId: string];
 }>();
 
 const getPriorityText = (priority: 'low' | 'medium' | 'high') => {

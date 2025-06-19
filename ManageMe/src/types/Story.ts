@@ -1,10 +1,10 @@
 export type Story = {
-	id: number;
+	id: string;
 	name: string;
 	description: string;
 	priority: 'low' | 'medium' | 'high';
-	projectId: number;
+	projectId: string;
 	createdDate: string;
 	status: 'todo' | 'doing' | 'done';
-	ownerId: number;
+	ownerId: string;
 };

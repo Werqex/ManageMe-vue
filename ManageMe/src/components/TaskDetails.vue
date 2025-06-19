@@ -219,9 +219,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	close: [];
-	assign: [taskId: number];
-	complete: [taskId: number];
-	reset: [taskId: number];
+	assign: [taskId: string];
+	complete: [taskId: string];
+	reset: [taskId: string];
 	edit: [task: Task];
 }>();
 

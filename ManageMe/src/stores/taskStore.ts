@@ -7,7 +7,7 @@ import { apiService } from '../services/ApiService';
 export const useTaskStore = defineStore('tasks', () => {
 	// Stan aplikacji - przechowuje zadania i identyfikator bieżącej historii
 	const tasks = ref<Task[]>([]);
-	const currentStoryId = ref<number | null>(null);
+	const currentStoryId = ref<string | null>(null);
 
 	// Obliczane właściwości - filtrowanie zadań według statusu
 	const todoTasks = computed(() =>
@@ -31,7 +31,7 @@ export const useTaskStore = defineStore('tasks', () => {
 	}));
 
 	// Pobiera zadania dla określonej historii
-	const fetchTasksByStory = async (storyId: number) => {
+	const fetchTasksByStory = async (storyId: string) => {
 		try {
 			currentStoryId.value = storyId;
 			tasks.value = await apiService.getTasksByStory(storyId);
@@ -45,7 +45,7 @@ export const useTaskStore = defineStore('tasks', () => {
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
-		storyId: number, // Zmiana z string na number
+		storyId: string,
 		estimatedHours: number
 	) => {
 		try {
@@ -66,7 +66,7 @@ export const useTaskStore = defineStore('tasks', () => {
 
 	// Aktualizuje istniejące zadanie
 	const updateTask = async (
-		id: number,
+		id: string,
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
@@ -89,7 +89,7 @@ export const useTaskStore = defineStore('tasks', () => {
 	};
 
 	// Usuwa zadanie o podanym identyfikatorze
-	const deleteTask = async (id: number) => {
+	const deleteTask = async (id: string) => {
 		try {
 			await apiService.deleteTask(id);
 			if (currentStoryId.value) {
@@ -101,7 +101,7 @@ export const useTaskStore = defineStore('tasks', () => {
 	};
 
 	// Przypisuje użytkownika do zadania
-	const assignUserToTask = async (taskId: number, userId: number) => {
+	const assignUserToTask = async (taskId: string, userId: string) => {
 		try {
 			await apiService.assignUserToTask(taskId, userId);
 			if (currentStoryId.value) {
@@ -113,7 +113,7 @@ export const useTaskStore = defineStore('tasks', () => {
 	};
 
 	// Oznacza zadanie jako ukończone
-	const completeTask = async (taskId: number) => {
+	const completeTask = async (taskId: string) => {
 		try {
 			await apiService.completeTask(taskId);
 			if (currentStoryId.value) {
@@ -125,7 +125,7 @@ export const useTaskStore = defineStore('tasks', () => {
 	};
 
 	// Resetuje zadanie do statusu "do zrobienia"
-	const resetTaskToTodo = async (taskId: number) => {
+	const resetTaskToTodo = async (taskId: string) => {
 		try {
 			await apiService.resetTaskToTodo(taskId);
 			if (currentStoryId.value) {
@@ -138,7 +138,7 @@ export const useTaskStore = defineStore('tasks', () => {
 
 	// Pobiera szczegółowe informacje o zadaniu wraz z powiązaną historią
 	const getTaskDetails = async (
-		taskId: number
+		taskId: string
 	): Promise<{ task: Task; story: Story } | null> => {
 		try {
 			return await apiService.getTaskDetails(taskId);

@@ -99,12 +99,12 @@ defineProps<{
 }>();
 
 defineEmits<{
-	assign: [taskId: number];
-	complete: [taskId: number];
-	reset: [taskId: number];
-	details: [taskId: number];
+	assign: [id: string];
+	complete: [id: string];
+	reset: [id: string];
+	details: [id: string];
 	edit: [task: Task];
-	delete: [taskId: number];
+	delete: [id: string];
 }>();
 
 const getPriorityText = (priority: 'low' | 'medium' | 'high') => {
@@ -126,7 +126,7 @@ const getPriorityClass = (priority: 'low' | 'medium' | 'high') => {
 	return classes[priority];
 };
 
-const getAssignedUserName = (userId: number) => {
+const getAssignedUserName = (userId: string) => {
 	const user = userStore.getUserById(userId);
 	return user ? `${user.firstName} ${user.lastName}` : 'Nieznany';
 };

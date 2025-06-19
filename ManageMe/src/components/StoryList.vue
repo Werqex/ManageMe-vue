@@ -23,13 +23,13 @@
 				@task-details="openTaskDetailsModal" />
 		</div>
 		<div v-else>
-			<h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">
-				Historyjki projektu
-			</h3>
-			<div class="mb-8">
+			<div class="flex justify-between items-center mb-6">
+				<h3 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+					Historyjki projektu
+				</h3>
 				<button
 					@click="openStoryCreateModal"
-					class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-md transition-colors font-medium cursor-pointer">
+					class="px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-md transition-colors font-medium cursor-pointer">
 					Dodaj nową historyjkę
 				</button>
 			</div>
@@ -40,7 +40,7 @@
 						class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
 						Do zrobienia
 						<span
-							class="ml-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm px-2 py-1 rounded-full">
+							class="ml-2 px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full text-sm">
 							{{ storyStore.todoStories.length }}
 						</span>
 					</h4>
@@ -57,12 +57,12 @@
 				</div>
 
 				<div
-					class="bg-blue-50 dark:bg-blue-900 rounded-lg p-4 transition-colors">
+					class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors">
 					<h4
-						class="text-lg font-semibold text-blue-700 dark:text-blue-200 mb-4 flex items-center">
+						class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
 						W trakcie
 						<span
-							class="ml-2 bg-blue-200 dark:bg-blue-700 text-blue-700 dark:text-blue-200 text-sm px-2 py-1 rounded-full">
+							class="ml-2 px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full text-sm">
 							{{ storyStore.doingStories.length }}
 						</span>
 					</h4>
@@ -79,12 +79,12 @@
 				</div>
 
 				<div
-					class="bg-green-50 dark:bg-green-900 rounded-lg p-4 transition-colors">
+					class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors">
 					<h4
-						class="text-lg font-semibold text-green-700 dark:text-green-200 mb-4 flex items-center">
+						class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4 flex items-center">
 						Zakończone
 						<span
-							class="ml-2 bg-green-200 dark:bg-green-700 text-green-700 dark:text-green-200 text-sm px-2 py-1 rounded-full">
+							class="ml-2 px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-full text-sm">
 							{{ storyStore.doneStories.length }}
 						</span>
 					</h4>
@@ -154,7 +154,7 @@ import AssignUserModal from './AssignUserModal.vue';
 import EditModal from './EditModal.vue';
 
 const props = defineProps<{
-	projectId: number;
+	projectId: string;
 }>();
 
 const storyStore = useStoryStore();
@@ -162,7 +162,7 @@ const taskStore = useTaskStore();
 const userStore = useUserStore();
 
 // Stan dla widoku zadań
-const selectedStoryId = ref<number | null>(null);
+const selectedStoryId = ref<string | null>(null);
 const selectedStoryName = ref<string>('');
 
 // Stan modala dla historyjek
@@ -190,12 +190,12 @@ const taskDetailsState = ref({
 // Stan modala przypisywania użytkownika
 const assignUserState = ref({
 	show: false,
-	taskId: null as number | null,
+	taskId: null as string | null,
 	taskName: '',
 });
 
 // Funkcje do zarządzania widokiem historyjek vs zadań
-const selectStory = (storyId: number) => {
+const selectStory = (storyId: string) => {
 	const story = storyStore.stories.find((s) => s.id === storyId);
 	if (story) {
 		selectedStoryId.value = storyId;
@@ -315,7 +315,8 @@ const handleTaskModalSubmit = (formData: any) => {
 };
 
 // Funkcje dla szczegółów zadania
-const openTaskDetailsModal = async (taskId: number) => {
+const openTaskDetailsModal = async (taskId: string) => {
+	// Zmiana z number na string
 	try {
 		const details = await taskStore.getTaskDetails(taskId);
 		taskDetailsState.value = {
@@ -340,7 +341,7 @@ const closeTaskDetailsModal = () => {
 };
 
 // Funkcje dla przypisywania użytkownika
-const openAssignUserModal = (taskId: number) => {
+const openAssignUserModal = (taskId: string) => {
 	const task = taskStore.tasks.find((t) => t.id === taskId);
 	if (task) {
 		assignUserState.value = {
@@ -359,26 +360,26 @@ const closeAssignUserModal = () => {
 	};
 };
 
-const handleAssignUser = (taskId: number, userId: number) => {
+const handleAssignUser = (taskId: string, userId: string) => {
 	taskStore.assignUserToTask(taskId, userId);
 	closeAssignUserModal();
 	closeTaskDetailsModal();
 };
 
 // Inne funkcje dla zadań
-const handleCompleteTask = (taskId: number) => {
+const handleCompleteTask = (taskId: string) => {
 	taskStore.completeTask(taskId);
 	closeTaskDetailsModal();
 };
 
-const handleResetTask = (taskId: number) => {
+const handleResetTask = (taskId: string) => {
 	taskStore.resetTaskToTodo(taskId);
 	closeTaskDetailsModal();
 };
 
 // Funkcje dla historyjek
 const handleChangeStatus = (
-	storyId: number,
+	storyId: string,
 	newStatus: 'todo' | 'doing' | 'done'
 ) => {
 	const story = storyStore.stories.find((s) => s.id === storyId);
@@ -394,7 +395,7 @@ const handleChangeStatus = (
 	}
 };
 
-const handleDelete = (id: number) => {
+const handleDelete = (id: string) => {
 	storyStore.deleteStory(id, props.projectId);
 };
 

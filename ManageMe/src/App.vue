@@ -37,21 +37,14 @@
 			<ActiveProject
 				v-if="projectStore.activeProject"
 				:project="projectStore.activeProject"
-				@go-back="projectStore.goBackToAllProjects()"
-				@edit="openProjectEditModal"
-				@delete="deleteActiveProject" />
+				@go-back="projectStore.goBackToAllProjects()" />
 			<div v-else class="space-y-6">
-				<div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-					<button
-						@click="openProjectCreateModal"
-						class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white rounded-md transition-colors font-medium text-lg cursor-pointer">
-						Dodaj nowy projekt
-					</button>
-				</div>
 				<ProjectList
 					:projects="projectStore.projects"
 					@select="projectStore.selectProject"
-					@delete="projectStore.deleteProject" />
+					@edit="openProjectEditModal"
+					@delete="deleteProject"
+					@create="openProjectCreateModal" />
 			</div>
 		</div>
 
@@ -148,9 +141,8 @@ const handleModalSubmit = (formData: any) => {
 	closeModal();
 };
 
-const deleteActiveProject = (id: number) => {
+const deleteProject = (id: string) => {
 	projectStore.deleteProject(id);
-	projectStore.goBackToAllProjects();
 };
 
 onMounted(async () => {
@@ -166,7 +158,6 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-	// Usuń listener motywu systemu
 	if (removeSystemThemeListener) {
 		removeSystemThemeListener();
 	}

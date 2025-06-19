@@ -52,7 +52,7 @@ export class ApiService {
 
 	// Aktualizuje istniejący projekt
 	async updateProject(
-		id: number,
+		id: string,
 		name: string,
 		description: string
 	): Promise<void> {
@@ -65,7 +65,7 @@ export class ApiService {
 	}
 
 	// Usuwa projekt o podanym identyfikatorze
-	async deleteProject(id: number): Promise<void> {
+	async deleteProject(id: string): Promise<void> {
 		const response = await fetch(`${this.baseUrl}/projects/${id}`, {
 			method: 'DELETE',
 			headers: await this.getAuthHeaders(),
@@ -76,7 +76,7 @@ export class ApiService {
 	// STORIES - Z API
 	// Pobiera historie przypisane do projektu
 	// Konwertuje format MongoDB na frontend
-	async getStoriesByProject(projectId: number): Promise<Story[]> {
+	async getStoriesByProject(projectId: string): Promise<Story[]> {
 		const response = await fetch(
 			`${this.baseUrl}/stories/project/${projectId}`,
 			{
@@ -103,8 +103,8 @@ export class ApiService {
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
-		projectId: number,
-		ownerId: number
+		projectId: string,
+		ownerId: string
 	): Promise<Story> {
 		const response = await fetch(`${this.baseUrl}/stories`, {
 			method: 'POST',
@@ -113,8 +113,8 @@ export class ApiService {
 				name,
 				description,
 				priority,
-				projectId: projectId.toString(),
-				ownerId: ownerId.toString(),
+				projectId,
+				ownerId,
 			}),
 		});
 		if (!response.ok) throw new Error('Failed to create story');
@@ -135,7 +135,7 @@ export class ApiService {
 	// Aktualizuje istniejącą historię
 	// Obejmuje aktualizację statusu
 	async updateStory(
-		id: number,
+		id: string, // Zmiana z number na string
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
@@ -150,7 +150,7 @@ export class ApiService {
 	}
 
 	// Usuwa historię o podanym identyfikatorze
-	async deleteStory(id: number): Promise<void> {
+	async deleteStory(id: string): Promise<void> {
 		const response = await fetch(`${this.baseUrl}/stories/${id}`, {
 			method: 'DELETE',
 			headers: await this.getAuthHeaders(),
@@ -205,7 +205,7 @@ export class ApiService {
 
 	// Pobiera zadania przypisane do historii
 	// Konwertuje format MongoDB na frontend
-	async getTasksByStory(storyId: number): Promise<Task[]> {
+	async getTasksByStory(storyId: string): Promise<Task[]> {
 		const response = await fetch(`${this.baseUrl}/tasks/story/${storyId}`, {
 			headers: await this.getAuthHeaders(),
 		});
@@ -233,7 +233,7 @@ export class ApiService {
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
-		storyId: number,
+		storyId: string,
 		estimatedHours: number
 	): Promise<Task> {
 		const response = await fetch(`${this.baseUrl}/tasks`, {
@@ -243,7 +243,7 @@ export class ApiService {
 				name,
 				description,
 				priority,
-				storyId: storyId.toString(),
+				storyId,
 				estimatedHours,
 			}),
 		});
@@ -265,7 +265,7 @@ export class ApiService {
 	// Aktualizuje istniejące zadanie
 	// Nie zmienia statusu ani przypisania
 	async updateTask(
-		id: number,
+		id: string,
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',
@@ -281,18 +281,18 @@ export class ApiService {
 
 	// Przypisuje użytkownika do zadania
 	// Rozpoczyna pracę - ustawia status "doing"
-	async assignUserToTask(taskId: number, userId: number): Promise<void> {
+	async assignUserToTask(taskId: string, userId: string): Promise<void> {
 		const response = await fetch(`${this.baseUrl}/tasks/${taskId}/assign`, {
 			method: 'POST',
 			headers: await this.getAuthHeaders(),
-			body: JSON.stringify({ userId: userId.toString() }),
+			body: JSON.stringify({ userId }),
 		});
 		if (!response.ok) throw new Error('Failed to assign user to task');
 	}
 
 	// Oznacza zadanie jako ukończone
 	// Ustawia status na "done" i zapisuje datę ukończenia
-	async completeTask(taskId: number): Promise<void> {
+	async completeTask(taskId: string): Promise<void> {
 		const response = await fetch(`${this.baseUrl}/tasks/${taskId}/complete`, {
 			method: 'POST',
 			headers: await this.getAuthHeaders(),
@@ -302,7 +302,7 @@ export class ApiService {
 
 	// Resetuje zadanie do początkowego stanu
 	// Ustawia status "todo" i usuwa daty rozpoczęcia/zakończenia
-	async resetTaskToTodo(taskId: number): Promise<void> {
+	async resetTaskToTodo(taskId: string): Promise<void> {
 		const response = await fetch(`${this.baseUrl}/tasks/${taskId}/reset`, {
 			method: 'POST',
 			headers: await this.getAuthHeaders(),
@@ -311,7 +311,7 @@ export class ApiService {
 	}
 
 	// Usuwa zadanie o podanym identyfikatorze
-	async deleteTask(id: number): Promise<void> {
+	async deleteTask(id: string): Promise<void> {
 		const response = await fetch(`${this.baseUrl}/tasks/${id}`, {
 			method: 'DELETE',
 			headers: await this.getAuthHeaders(),
@@ -322,7 +322,7 @@ export class ApiService {
 	// Pobiera szczegółowe informacje o zadaniu wraz z powiązaną historią
 	// Łączy dane zadania i historii w jeden obiekt
 	async getTaskDetails(
-		taskId: number
+		taskId: string
 	): Promise<{ task: Task; story: Story } | null> {
 		try {
 			const response = await fetch(`${this.baseUrl}/tasks/${taskId}/details`, {

@@ -6,7 +6,7 @@ export const useProjectStore = defineStore('projects', () => {
 	// Stan projektow i UI
 	const projects = ref<Project[]>([]);
 	const editMode = ref(false);
-	const editId = ref<number | null>(null);
+	const editId = ref<string | null>(null);
 	const activeProject = ref<Project | null>(null);
 
 	// Przygotowuje naglowki autoryzacji dla zapytan API
@@ -50,7 +50,7 @@ export const useProjectStore = defineStore('projects', () => {
 				body: JSON.stringify({ name, description }),
 			});
 			if (!response.ok) throw new Error('Failed to create project');
-			await fetchProjects(); // Refresh list
+			await fetchProjects();
 		} catch (error) {
 			console.error('Failed to create project:', error);
 		}
@@ -59,7 +59,7 @@ export const useProjectStore = defineStore('projects', () => {
 	// Aktualizuje istniejacy projekt
 	// Odswieza liste projektow po modyfikacji
 	const updateProject = async (
-		id: number,
+		id: string,
 		name: string,
 		description: string
 	) => {
@@ -70,7 +70,7 @@ export const useProjectStore = defineStore('projects', () => {
 				body: JSON.stringify({ name, description }),
 			});
 			if (!response.ok) throw new Error('Failed to update project');
-			await fetchProjects(); // Refresh list
+			await fetchProjects();
 		} catch (error) {
 			console.error('Failed to update project:', error);
 		}
@@ -78,14 +78,14 @@ export const useProjectStore = defineStore('projects', () => {
 
 	// Usuwa projekt z systemu
 	// Odswieza liste po usunieciu
-	const deleteProject = async (id: number) => {
+	const deleteProject = async (id: string) => {
 		try {
 			const response = await fetch(`http://localhost:3000/api/projects/${id}`, {
 				method: 'DELETE',
 				headers: getAuthHeaders(),
 			});
 			if (!response.ok) throw new Error('Failed to delete project');
-			await fetchProjects(); // Refresh list
+			await fetchProjects();
 		} catch (error) {
 			console.error('Failed to delete project:', error);
 		}

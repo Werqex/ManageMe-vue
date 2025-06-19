@@ -1,5 +1,5 @@
 export type User = {
-	id: number;
+	id: string;
 	firstName: string;
 	lastName: string;
 	role: 'admin' | 'devops' | 'developer';
@@ -19,7 +19,7 @@ export type LoginResponse = {
 };
 
 export type UserProfile = {
-	id: number;
+	id: string;
 	firstName: string;
 	lastName: string;
 	role: 'admin' | 'devops' | 'developer';

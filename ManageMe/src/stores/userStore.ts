@@ -81,8 +81,7 @@ export const useUserStore = defineStore('user', () => {
 	// Obsługuje zarówno string jak i number, co jest przydatne dla MongoDB ObjectId
 	const getUserById = (id: string | number) => {
 		return users.value.find((user) => {
-			// Porównaj jako string - MongoDB ObjectId
-			return user.id.toString() === id.toString();
+			return user.id === id.toString();
 		});
 	};
 

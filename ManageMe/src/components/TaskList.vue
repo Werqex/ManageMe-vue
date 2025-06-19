@@ -94,26 +94,26 @@ const props = defineProps<{
 
 const emit = defineEmits<{
 	addTask: [];
-	assignTask: [taskId: number];
+	assignTask: [taskId: string];
 	editTask: [task: Task];
-	taskDetails: [taskId: number];
+	taskDetails: [taskId: string];
 }>();
 
 const taskStore = useTaskStore();
 
-const handleAssignTask = (taskId: number) => {
+const handleAssignTask = (taskId: string) => {
 	emit('assignTask', taskId);
 };
 
-const handleCompleteTask = (taskId: number) => {
+const handleCompleteTask = (taskId: string) => {
 	taskStore.completeTask(taskId);
 };
 
-const handleResetTask = (taskId: number) => {
+const handleResetTask = (taskId: string) => {
 	taskStore.resetTaskToTodo(taskId);
 };
 
-const handleTaskDetails = (taskId: number) => {
+const handleTaskDetails = (taskId: string) => {
 	emit('taskDetails', taskId);
 };
 
@@ -121,7 +121,7 @@ const handleEditTask = (task: Task) => {
 	emit('editTask', task);
 };
 
-const handleDeleteTask = (taskId: number) => {
+const handleDeleteTask = (taskId: string) => {
 	taskStore.deleteTask(taskId);
 };
 </script>

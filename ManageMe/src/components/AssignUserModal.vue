@@ -73,17 +73,17 @@ import { disableScroll, enableScroll } from '../utils/scrollLock';
 
 const props = defineProps<{
 	show: boolean;
-	taskId: number | null;
+	taskId: string | null;
 	taskName: string;
 }>();
 
 const emit = defineEmits<{
 	close: [];
-	assign: [taskId: number, userId: number];
+	assign: [taskId: string, userId: string];
 }>();
 
 const userStore = useUserStore();
-const selectedUserId = ref<number | ''>('');
+const selectedUserId = ref<string | ''>('');
 
 const availableUsers = userStore
 	.getUsersByRole('developer')
@@ -115,7 +115,7 @@ const getRoleText = (role: 'admin' | 'devops' | 'developer') => {
 
 const handleSubmit = () => {
 	if (selectedUserId.value && props.taskId) {
-		emit('assign', props.taskId, selectedUserId.value as number);
+		emit('assign', props.taskId, selectedUserId.value);
 		selectedUserId.value = '';
 	}
 };
