@@ -420,7 +420,7 @@ app.get('/api/tasks/:id/details', verifyToken, async (req: any, res) => {
 });
 
 app.listen(port, () => {
-	console.log('  Wszystko działa');
+	console.log('Wszystko działa');
 });
 
 function generateToken(userId: string, expirationInSeconds: number = 3600) {

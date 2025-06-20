@@ -101,26 +101,32 @@ const emit = defineEmits<{
 
 const taskStore = useTaskStore();
 
+// Przypisanie użytkownika do zadania
 const handleAssignTask = (taskId: string) => {
 	emit('assignTask', taskId);
 };
 
+// Zmiana statusu zadania na zakończone
 const handleCompleteTask = (taskId: string) => {
 	taskStore.completeTask(taskId);
 };
 
+// Resetowanie zadania do początkowego stanu
 const handleResetTask = (taskId: string) => {
 	taskStore.resetTaskToTodo(taskId);
 };
 
+// Obsługiwanie szczegółów zadania
 const handleTaskDetails = (taskId: string) => {
 	emit('taskDetails', taskId);
 };
 
+// Obsługiwanie edycji zadania
 const handleEditTask = (task: Task) => {
 	emit('editTask', task);
 };
 
+// Usuwanie zadania
 const handleDeleteTask = (taskId: string) => {
 	taskStore.deleteTask(taskId);
 };

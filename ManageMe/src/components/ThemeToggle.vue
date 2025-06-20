@@ -70,20 +70,18 @@ const themeStore = useThemeStore();
 // Stan rozwinięcia menu wyboru motywu
 const isDropdownOpen = ref(false);
 
-// Właściwości obliczane
-// Zwraca tekst dla aktualnego motywu
+// Sprawdzanie czy motyw jest ciemny czy jasny
 const currentThemeText = computed(() => {
 	if (themeStore.isSystemPreference) return 'Automatyczny';
 	return themeStore.isDark ? 'Ciemny' : 'Jasny';
 });
 
-// Funkcje obsługi interfejsu
-// Przełącza widoczność rozwijanej listy opcji
+// Przełaczanie rozwijanej listy motywów
 const toggleDropdown = () => {
 	isDropdownOpen.value = !isDropdownOpen.value;
 };
 
-// Wybiera motyw na podstawie przekazanego parametru
+// Wybieranie motywu
 const selectTheme = (theme: 'light' | 'dark' | 'system') => {
 	switch (theme) {
 		case 'light':
@@ -99,7 +97,7 @@ const selectTheme = (theme: 'light' | 'dark' | 'system') => {
 	isDropdownOpen.value = false;
 };
 
-// Zamyka dropdown po kliknięciu poza nim
+// Zamyka dropdown po kliknięciu w tło
 const handleClickOutside = (event: Event) => {
 	const target = event.target as Element;
 	const dropdown = document.querySelector('.relative');
@@ -108,13 +106,10 @@ const handleClickOutside = (event: Event) => {
 	}
 };
 
-// Hooks cyklu życia komponentu
-// Dodaje nasłuchiwanie kliknięć po zamontowaniu komponentu
 onMounted(() => {
 	document.addEventListener('click', handleClickOutside);
 });
 
-// Usuwa nasłuchiwanie kliknięć przed usunięciem komponentu
 onBeforeUnmount(() => {
 	document.removeEventListener('click', handleClickOutside);
 });

@@ -87,17 +87,19 @@ const modalState = ref({
 // Referencja do funkcji usuwającej listener
 let removeSystemThemeListener: (() => void) | null = null;
 
-// Funkcje logowania
+// Logowanie
 const handleLoginSuccess = (user: any) => {
 	userStore.login(user);
 	projectStore.fetchProjects();
 };
 
+// Wylogowanie
 const handleLogout = () => {
 	userStore.logout();
 	projectStore.goBackToAllProjects();
 };
 
+// Modal tworzenia projektu
 const openProjectCreateModal = () => {
 	modalState.value = {
 		show: true,
@@ -107,6 +109,7 @@ const openProjectCreateModal = () => {
 	};
 };
 
+// Modal edycji projektu
 const openProjectEditModal = (project: Project) => {
 	modalState.value = {
 		show: true,
@@ -116,6 +119,7 @@ const openProjectEditModal = (project: Project) => {
 	};
 };
 
+// Zamykanie modala
 const closeModal = () => {
 	modalState.value = {
 		show: false,
@@ -125,6 +129,7 @@ const closeModal = () => {
 	};
 };
 
+// Wysyłanie danych z modala
 const handleModalSubmit = (formData: any) => {
 	if (modalState.value.type === 'project') {
 		if (modalState.value.isEditing) {
@@ -141,6 +146,7 @@ const handleModalSubmit = (formData: any) => {
 	closeModal();
 };
 
+// Usuwanie projektu
 const deleteProject = (id: string) => {
 	projectStore.deleteProject(id);
 };

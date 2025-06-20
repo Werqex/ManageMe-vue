@@ -227,6 +227,7 @@ const emit = defineEmits<{
 
 const userStore = useUserStore();
 
+// Zarządzanie blokowania scrolla
 watch(
 	() => props.show,
 	(newShow) => {
@@ -238,12 +239,14 @@ watch(
 	}
 );
 
+// Zamyka modal po kliknięciu w tło
 const handleBackdropClick = (event: Event) => {
 	if (event.target === event.currentTarget) {
 		emit('close');
 	}
 };
 
+// Zwracanie tesktu priorytetu w języku polskim
 const getPriorityText = (priority: 'low' | 'medium' | 'high') => {
 	const priorities = {
 		low: 'Niski',
@@ -253,6 +256,7 @@ const getPriorityText = (priority: 'low' | 'medium' | 'high') => {
 	return priorities[priority];
 };
 
+// Dodawanie koloru do każdego priorytetu
 const getPriorityClass = (priority: 'low' | 'medium' | 'high') => {
 	const classes = {
 		low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
@@ -263,6 +267,7 @@ const getPriorityClass = (priority: 'low' | 'medium' | 'high') => {
 	return classes[priority];
 };
 
+// Zwracanie tesktu statusu w języku polskim
 const getStatusText = (status: 'todo' | 'doing' | 'done') => {
 	const statuses = {
 		todo: 'Do zrobienia',
@@ -272,6 +277,7 @@ const getStatusText = (status: 'todo' | 'doing' | 'done') => {
 	return statuses[status];
 };
 
+// Dodawanie koloru do każdego statusu
 const getStatusClass = (status: 'todo' | 'doing' | 'done') => {
 	const classes = {
 		todo: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
@@ -281,6 +287,7 @@ const getStatusClass = (status: 'todo' | 'doing' | 'done') => {
 	return classes[status];
 };
 
+// Pobieranie nazwy przypisanego użytkownika
 const getAssignedUserName = (userId: string | number | undefined) => {
 	if (!userId) return 'Nieprzypisane';
 
@@ -291,6 +298,7 @@ const getAssignedUserName = (userId: string | number | undefined) => {
 		: `Nieznany użytkownik (ID: ${userId})`;
 };
 
+// Formatowanie daty na polski
 const formatDateTime = (dateString: string) => {
 	const date = new Date(dateString);
 	return date.toLocaleDateString('pl-PL', {

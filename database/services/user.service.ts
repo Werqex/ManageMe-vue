@@ -13,11 +13,13 @@ export default class UserService {
 		return this.db;
 	}
 
+	// Pobiera kolekcję użytkowników z bazy danych
 	private async getCollection(): Promise<Collection> {
 		const db = await this.getDatabase();
 		return db.collection('users');
 	}
 
+	// Tworzy nowego użytkownika w bazie danych
 	async findById(id: string): Promise<UserDocument | null> {
 		const collection = await this.getCollection();
 		const result = await collection.findOne({ _id: new ObjectId(id) });
@@ -34,6 +36,7 @@ export default class UserService {
 		return null;
 	}
 
+	// Tworzy nowego użytkownika w bazie danych
 	async findByLogin(login: string): Promise<UserDocument | null> {
 		const collection = await this.getCollection();
 		const result = await collection.findOne({ login });
@@ -50,6 +53,7 @@ export default class UserService {
 		return null;
 	}
 
+	// Pobiera użytkowników
 	async getAllUsers(): Promise<UserDocument[]> {
 		const collection = await this.getCollection();
 		const users = await collection.find({}).toArray();
@@ -63,6 +67,7 @@ export default class UserService {
 		}));
 	}
 
+	// Sprawdza hasło użytkownika
 	async verifyPassword(
 		plainPassword: string,
 		userPassword: string

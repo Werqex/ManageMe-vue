@@ -135,7 +135,7 @@ export class ApiService {
 	// Aktualizuje istniejącą historię
 	// Obejmuje aktualizację statusu
 	async updateStory(
-		id: string, // Zmiana z number na string
+		id: string,
 		name: string,
 		description: string,
 		priority: 'low' | 'medium' | 'high',

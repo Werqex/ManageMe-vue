@@ -62,6 +62,7 @@ const emit = defineEmits<{
 const localName = ref(props.name || '');
 const localDescription = ref(props.description || '');
 
+// Aktualizowanie opisu jak zmieni się props
 watch(
 	() => props.name,
 	(newName) => {
@@ -69,6 +70,7 @@ watch(
 	}
 );
 
+// Aktualizowanie nazwy jak zmieni się props
 watch(
 	() => props.description,
 	(newDescription) => {
@@ -76,6 +78,7 @@ watch(
 	}
 );
 
+// Restetownie fornularza
 const handleSubmit = () => {
 	emit('submit', localName.value, localDescription.value);
 	if (!props.isEditing) {

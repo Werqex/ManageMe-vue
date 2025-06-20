@@ -71,6 +71,7 @@ import { ref, watch, onBeforeUnmount } from 'vue';
 import { useUserStore } from '../stores/userStore';
 import { disableScroll, enableScroll } from '../utils/scrollLock';
 
+
 const props = defineProps<{
 	show: boolean;
 	taskId: string | null;
@@ -85,17 +86,17 @@ const emit = defineEmits<{
 const userStore = useUserStore();
 const selectedUserId = ref<string | ''>('');
 
+// Pobiera możliwych użytkowników do przypisania
 const availableUsers = userStore
 	.getUsersByRole('developer')
 	.concat(userStore.getUsersByRole('devops'));
 
-// Obserwuj zmiany w show prop i zarządzaj scroll'em
+// Obserwuje zmiany w show prop i zarządzanie scroll'em
 watch(
 	() => props.show,
 	(newShow) => {
 		if (newShow) {
 			disableScroll();
-			// Resetuj wybór przy otwieraniu modala
 			selectedUserId.value = '';
 		} else {
 			enableScroll();
@@ -103,16 +104,19 @@ watch(
 	}
 );
 
+// Zamyka modal po kliknięciu w tło
 const handleBackdropClick = (event: Event) => {
 	if (event.target === event.currentTarget) {
 		emit('close');
 	}
 };
 
+// Zamienia tekst roli
 const getRoleText = (role: 'admin' | 'devops' | 'developer') => {
 	return userStore.getRoleText(role);
 };
 
+// Obsługuje wysłanie formularza
 const handleSubmit = () => {
 	if (selectedUserId.value && props.taskId) {
 		emit('assign', props.taskId, selectedUserId.value);
@@ -120,7 +124,6 @@ const handleSubmit = () => {
 	}
 };
 
-// Cleanup przy unmount
 onBeforeUnmount(() => {
 	if (props.show) {
 		enableScroll();

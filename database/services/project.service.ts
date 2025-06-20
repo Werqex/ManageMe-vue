@@ -13,11 +13,13 @@ export default class ProjectService {
 		return this.db;
 	}
 
+	// Pobiera kolekcję projektów z bazy danych
 	private async getCollection(): Promise<Collection> {
 		const db = await this.getDatabase();
 		return db.collection('projects');
 	}
 
+	// Pobiera wszystkie projekty z bazy danych
 	async getAllProjects(): Promise<ProjectDocument[]> {
 		const collection = await this.getCollection();
 		const projects = await collection.find({}).toArray();
@@ -28,6 +30,7 @@ export default class ProjectService {
 		}));
 	}
 
+	// Tworzy nowy projekt w bazie danych
 	async createProject(
 		name: string,
 		description: string
@@ -41,6 +44,7 @@ export default class ProjectService {
 		};
 	}
 
+	// Wyszukuje projekt po id
 	async findById(id: string): Promise<ProjectDocument | null> {
 		const collection = await this.getCollection();
 		const result = await collection.findOne({ _id: new ObjectId(id) });
@@ -54,12 +58,14 @@ export default class ProjectService {
 		return null;
 	}
 
+	// Usuwa projekt z bazy danych
 	async deleteProject(id: string): Promise<boolean> {
 		const collection = await this.getCollection();
 		const result = await collection.deleteOne({ _id: new ObjectId(id) });
 		return result.deletedCount === 1;
 	}
 
+	// Aktualizuje projekt w bazie danych
 	async updateProject(
 		id: string,
 		name: string,

@@ -62,7 +62,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
-// Definicja typów dla props - interfejs komponentu
 const props = defineProps<{
 	name?: string;
 	description?: string;
@@ -71,7 +70,6 @@ const props = defineProps<{
 	isEditing?: boolean;
 }>();
 
-// Definicja eventów które komponent może emitować
 const emit = defineEmits<{
 	create: [
 		name: string,
@@ -87,7 +85,6 @@ const emit = defineEmits<{
 	cancel: [];
 }>();
 
-// Reactive refs - lokalne kopie danych z props
 const localName = ref(props.name || '');
 const localDescription = ref(props.description || '');
 const localPriority = ref<'low' | 'medium' | 'high'>(
@@ -95,7 +92,7 @@ const localPriority = ref<'low' | 'medium' | 'high'>(
 );
 const localStatus = ref<'todo' | 'doing' | 'done'>(props.status || 'todo');
 
-// Watchers - reagują na zmiany props i aktualizują lokalne dane
+// Aktualizowanie nazwy przy zmianie props
 watch(
 	() => props.name,
 	(newName) => {
@@ -103,6 +100,7 @@ watch(
 	}
 );
 
+// Aktualizowanie opisu przy zmianie props
 watch(
 	() => props.description,
 	(newDescription) => {
@@ -110,6 +108,7 @@ watch(
 	}
 );
 
+// Aktualizowanie priorytetu przy zmianie props
 watch(
 	() => props.priority,
 	(newPriority) => {
@@ -117,6 +116,7 @@ watch(
 	}
 );
 
+// Aktualizowanie statusu przy zmianie props
 watch(
 	() => props.status,
 	(newStatus) => {
@@ -124,7 +124,7 @@ watch(
 	}
 );
 
-// Funkcja obsługująca submit formularza
+// Obsługiwanie wysłania formularza (tworzenie lub edycja)
 const handleSubmit = () => {
 	if (props.isEditing) {
 		emit(

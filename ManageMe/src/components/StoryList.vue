@@ -194,7 +194,7 @@ const assignUserState = ref({
 	taskName: '',
 });
 
-// Funkcje do zarządzania widokiem historyjek vs zadań
+// Przełączanie widoku na zadania
 const selectStory = (storyId: string) => {
 	const story = storyStore.stories.find((s) => s.id === storyId);
 	if (story) {
@@ -204,12 +204,13 @@ const selectStory = (storyId: string) => {
 	}
 };
 
+// Powrót do widoku historyjek
 const goBackToStories = () => {
 	selectedStoryId.value = null;
 	selectedStoryName.value = '';
 };
 
-// Funkcje dla historyjek
+// Modal do doawania historyjek
 const openStoryCreateModal = () => {
 	storyModalState.value = {
 		show: true,
@@ -219,6 +220,7 @@ const openStoryCreateModal = () => {
 	};
 };
 
+// Modal do edycji historyjek
 const openStoryEditModal = (story: Story) => {
 	storyModalState.value = {
 		show: true,
@@ -228,6 +230,7 @@ const openStoryEditModal = (story: Story) => {
 	};
 };
 
+// Zamknięcie modala edycji/ dodawania historyjek
 const closeStoryModal = () => {
 	storyModalState.value = {
 		show: false,
@@ -237,6 +240,7 @@ const closeStoryModal = () => {
 	};
 };
 
+// Zapisywanie danych z modala historyjek
 const handleStoryModalSubmit = (formData: any) => {
 	if (storyModalState.value.isEditing) {
 		const story = storyModalState.value.data;
@@ -260,7 +264,7 @@ const handleStoryModalSubmit = (formData: any) => {
 	closeStoryModal();
 };
 
-// Funkcje dla zadań
+// Modal do doania zadania
 const openTaskCreateModal = () => {
 	taskModalState.value = {
 		show: true,
@@ -270,6 +274,7 @@ const openTaskCreateModal = () => {
 	};
 };
 
+// Modal do edycji zadania
 const openTaskEditModal = (task: Task) => {
 	closeTaskDetailsModal();
 
@@ -281,6 +286,7 @@ const openTaskEditModal = (task: Task) => {
 	};
 };
 
+// Zamknięcie modala edycji/ dodawania zadania
 const closeTaskModal = () => {
 	taskModalState.value = {
 		show: false,
@@ -290,6 +296,7 @@ const closeTaskModal = () => {
 	};
 };
 
+// Zapisywanie danych z modala zadania
 const handleTaskModalSubmit = (formData: any) => {
 	if (!selectedStoryId.value) return;
 
@@ -314,9 +321,8 @@ const handleTaskModalSubmit = (formData: any) => {
 	closeTaskModal();
 };
 
-// Funkcje dla szczegółów zadania
+// Modal do wyświetlania szczegółów zadania
 const openTaskDetailsModal = async (taskId: string) => {
-	// Zmiana z number na string
 	try {
 		const details = await taskStore.getTaskDetails(taskId);
 		taskDetailsState.value = {
@@ -325,7 +331,6 @@ const openTaskDetailsModal = async (taskId: string) => {
 		};
 	} catch (error) {
 		console.error('Failed to load task details:', error);
-		// Pokaż błąd użytkownikowi
 		taskDetailsState.value = {
 			show: true,
 			details: null,
@@ -333,6 +338,7 @@ const openTaskDetailsModal = async (taskId: string) => {
 	}
 };
 
+// Zamknięcie modala szczegółów zadania
 const closeTaskDetailsModal = () => {
 	taskDetailsState.value = {
 		show: false,
@@ -340,7 +346,7 @@ const closeTaskDetailsModal = () => {
 	};
 };
 
-// Funkcje dla przypisywania użytkownika
+// Modal do przypisywania użytkownika do zadania
 const openAssignUserModal = (taskId: string) => {
 	const task = taskStore.tasks.find((t) => t.id === taskId);
 	if (task) {
@@ -352,6 +358,7 @@ const openAssignUserModal = (taskId: string) => {
 	}
 };
 
+// Zamknięcie modala przypisywania użytkownika
 const closeAssignUserModal = () => {
 	assignUserState.value = {
 		show: false,
@@ -360,24 +367,26 @@ const closeAssignUserModal = () => {
 	};
 };
 
+// Przypisanie użytkownika do zadania
 const handleAssignUser = (taskId: string, userId: string) => {
 	taskStore.assignUserToTask(taskId, userId);
 	closeAssignUserModal();
 	closeTaskDetailsModal();
 };
 
-// Inne funkcje dla zadań
+// Oznaczenie zadania jako ukończone
 const handleCompleteTask = (taskId: string) => {
 	taskStore.completeTask(taskId);
 	closeTaskDetailsModal();
 };
 
+// Resetowanie zadania do początkowego stanu
 const handleResetTask = (taskId: string) => {
 	taskStore.resetTaskToTodo(taskId);
 	closeTaskDetailsModal();
 };
 
-// Funkcje dla historyjek
+// Zmiana statusu historyjki
 const handleChangeStatus = (
 	storyId: string,
 	newStatus: 'todo' | 'doing' | 'done'
@@ -395,6 +404,7 @@ const handleChangeStatus = (
 	}
 };
 
+// Usunięcie historyjki
 const handleDelete = (id: string) => {
 	storyStore.deleteStory(id, props.projectId);
 };

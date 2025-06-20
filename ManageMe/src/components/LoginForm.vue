@@ -89,6 +89,7 @@ const loginData = ref<LoginRequest>({
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 
+// Obsługiwanie logowania
 const handleSubmit = async () => {
 	isLoading.value = true;
 	error.value = null;

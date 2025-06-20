@@ -121,6 +121,7 @@ const emit = defineEmits<{
 	submit: [data: FormData];
 }>();
 
+// Reaktywne przechowywanie danych formularza
 const formData = ref<FormData>({
 	name: '',
 	description: '',
@@ -129,6 +130,7 @@ const formData = ref<FormData>({
 	estimatedHours: 1,
 });
 
+// Sprawdzanie typu edycji
 const title = computed(() => {
 	if (props.type === 'project') {
 		return props.isEditing ? 'Edytuj projekt' : 'Dodaj nowy projekt';
@@ -139,7 +141,7 @@ const title = computed(() => {
 	}
 });
 
-// Obserwuj zmiany w show prop i zarządzaj scroll'em
+// Obserwuje zmiany w show prop i zarządzanie scroll'em
 watch(
 	() => props.show,
 	(newShow) => {
@@ -151,7 +153,7 @@ watch(
 	}
 );
 
-// Obserwujemy zmiany w danych i aktualizujemy formularz
+// Obserwuje zmiany w danych i aktualizuje formularz
 watch(
 	() => props.data,
 	(newData) => {
@@ -176,12 +178,14 @@ watch(
 	{ immediate: true }
 );
 
+// Zamyka modal po kliknięciu w tło
 const handleBackdropClick = (event: Event) => {
 	if (event.target === event.currentTarget) {
 		emit('close');
 	}
 };
 
+// Obsługuje wysłanie formularza
 const handleSubmit = () => {
 	emit('submit', { ...formData.value });
 
@@ -196,7 +200,6 @@ const handleSubmit = () => {
 	}
 };
 
-// Cleanup przy unmount
 onBeforeUnmount(() => {
 	if (props.show) {
 		enableScroll();

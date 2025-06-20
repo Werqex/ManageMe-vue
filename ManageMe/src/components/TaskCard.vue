@@ -107,6 +107,7 @@ defineEmits<{
 	delete: [id: string];
 }>();
 
+// Zwracanie tesktu priorytetu w języku polskim
 const getPriorityText = (priority: 'low' | 'medium' | 'high') => {
 	const priorities = {
 		low: 'Niski',
@@ -116,6 +117,7 @@ const getPriorityText = (priority: 'low' | 'medium' | 'high') => {
 	return priorities[priority];
 };
 
+// Dodawanie koloru do każdego priorytetu
 const getPriorityClass = (priority: 'low' | 'medium' | 'high') => {
 	const classes = {
 		low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
@@ -126,11 +128,13 @@ const getPriorityClass = (priority: 'low' | 'medium' | 'high') => {
 	return classes[priority];
 };
 
+// Pobieranie nazwy przypisanego użytkownika
 const getAssignedUserName = (userId: string) => {
 	const user = userStore.getUserById(userId);
 	return user ? `${user.firstName} ${user.lastName}` : 'Nieznany';
 };
 
+// Formatowanie daty na polski
 const formatDate = (dateString: string) => {
 	const date = new Date(dateString);
 	return date.toLocaleDateString('pl-PL', {

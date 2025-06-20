@@ -13,11 +13,13 @@ export class StoryService {
 		return this.db;
 	}
 
+	// Pobiera kolekcję historii z bazy danych
 	private async getCollection(): Promise<Collection> {
 		const db = await this.getDatabase();
 		return db.collection('stories');
 	}
 
+	// Pobiera wszystkie historie z bazy danych
 	async getStoriesByProject(projectId: string): Promise<StoryDocument[]> {
 		const collection = await this.getCollection();
 		const stories = await collection.find({ projectId }).toArray();
@@ -33,6 +35,7 @@ export class StoryService {
 		}));
 	}
 
+	// Tworzy nową historię w bazie danych
 	async createStory(
 		name: string,
 		description: string,
@@ -51,6 +54,7 @@ export class StoryService {
 			status: 'todo' as const,
 		};
 
+		// Dodaje nową historię do bazy danych
 		const result = await collection.insertOne(storyData);
 		return {
 			_id: result.insertedId.toString(),
@@ -64,6 +68,7 @@ export class StoryService {
 		};
 	}
 
+	// Wyszukuje historię po id
 	async findById(id: string): Promise<StoryDocument | null> {
 		const collection = await this.getCollection();
 		const result = await collection.findOne({ _id: new ObjectId(id) });
@@ -82,12 +87,14 @@ export class StoryService {
 		return null;
 	}
 
+	// Usuwa historię z bazy danych
 	async deleteStory(id: string): Promise<boolean> {
 		const collection = await this.getCollection();
 		const result = await collection.deleteOne({ _id: new ObjectId(id) });
 		return result.deletedCount === 1;
 	}
 
+	// Aktualizuje historię w bazie danych
 	async updateStory(
 		id: string,
 		name: string,

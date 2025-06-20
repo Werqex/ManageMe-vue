@@ -39,7 +39,7 @@ const emit = defineEmits<{
 
 const storyStore = useStoryStore();
 
-// Funkcje które obsługują eventy
+// Emituje zdarzenie do rodzica
 const handleGoBack = () => {
 	emit('goBack');
 };

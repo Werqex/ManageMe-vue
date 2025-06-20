@@ -14,11 +14,13 @@ export class TaskService {
 		return this.db;
 	}
 
+	// Pobiera kolekcję zadań z bazy danych
 	private async getCollection(): Promise<Collection> {
 		const db = await this.getDatabase();
 		return db.collection('tasks');
 	}
 
+	// Pobiera wszystkie zadania przypisane do danej historii
 	async getTasksByStory(storyId: string): Promise<TaskDocument[]> {
 		const collection = await this.getCollection();
 		const tasks = await collection.find({ storyId }).toArray();
@@ -37,6 +39,7 @@ export class TaskService {
 		}));
 	}
 
+	// Tworzy nowe zadanie w bazie danych
 	async createTask(
 		name: string,
 		description: string,
@@ -55,6 +58,7 @@ export class TaskService {
 			createdDate: new Date(),
 		};
 
+		// Dodaje nowe zadanie do bazy danych
 		const result = await collection.insertOne(taskData);
 		return {
 			_id: result.insertedId.toString(),
@@ -68,6 +72,7 @@ export class TaskService {
 		};
 	}
 
+	// Wyszukuje zadanie po id
 	async findById(id: string): Promise<TaskDocument | null> {
 		const collection = await this.getCollection();
 		const result = await collection.findOne({ _id: new ObjectId(id) });
@@ -89,6 +94,7 @@ export class TaskService {
 		return null;
 	}
 
+	// Pobiera wszystkie zadania z bazy danych
 	async getTaskWithStory(
 		taskId: string
 	): Promise<{ task: TaskDocument; story: any } | null> {
@@ -120,12 +126,14 @@ export class TaskService {
 		};
 	}
 
+	// Usuwa zadanie z bazy danych
 	async deleteTask(id: string): Promise<boolean> {
 		const collection = await this.getCollection();
 		const result = await collection.deleteOne({ _id: new ObjectId(id) });
 		return result.deletedCount === 1;
 	}
 
+	// Aktualizuje zadanie w bazie danych
 	async updateTask(
 		id: string,
 		name: string,
@@ -141,6 +149,7 @@ export class TaskService {
 		return result.modifiedCount === 1;
 	}
 
+	// Przypisuje użytkownika do zadania
 	async assignUserToTask(taskId: string, userId: string): Promise<boolean> {
 		const collection = await this.getCollection();
 		const result = await collection.updateOne(
@@ -156,6 +165,7 @@ export class TaskService {
 		return result.modifiedCount === 1;
 	}
 
+	// Przypisuje zadanie jako zakończone i dodaje datę zakończenia
 	async completeTask(taskId: string): Promise<boolean> {
 		const collection = await this.getCollection();
 		const result = await collection.updateOne(
@@ -170,6 +180,7 @@ export class TaskService {
 		return result.modifiedCount === 1;
 	}
 
+	// Resetuje zadanie do początkowego stanu
 	async resetTaskToTodo(taskId: string): Promise<boolean> {
 		const collection = await this.getCollection();
 		const result = await collection.updateOne(
@@ -186,6 +197,7 @@ export class TaskService {
 		return result.modifiedCount === 1;
 	}
 
+	// Usuwa zadania przypisane do historii
 	async deleteTasksByStory(storyId: string): Promise<number> {
 		const collection = await this.getCollection();
 		const result = await collection.deleteMany({ storyId });

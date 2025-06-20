@@ -38,7 +38,7 @@ export const useUserStore = defineStore('user', () => {
 				} else {
 					logout();
 				}
-			} catch (error) {
+			} catch {
 				logout();
 			}
 		}
